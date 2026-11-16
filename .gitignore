@@ -19,6 +19,13 @@ lab/renders/
 lab/models/
 lab/deps/
 lab/research-deps/
+lab/voice-env/
+lab/node_modules/
+lab/.npm-cache/
+lab/.uv-cache/
+lab/motion-canvas/node_modules/
+lab/motion-canvas/output/
+lab/motion-canvas/.vite/
 
 __pycache__/
 *.py[cod]

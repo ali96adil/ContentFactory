@@ -1,45 +1,53 @@
 # تسليم واستئناف مصنع المحتوى
 
-آخر تحديث: 2026-11-17 (Asia/Baghdad)
+آخر تحديث: 2026-11-17 (`Asia/Baghdad`)
 
-## البيئة ونقطة Git
+## الحالة المحفوظة
 
-- المجلد: `/Users/aliadil/Projects/ContentFactory`
-- macOS 27.0، Apple Silicon `arm64`، المساحة المتاحة وقت الفحص قرابة 200 GiB.
-- الأدوات: Git 2.55.0، Node.js 24.21.0، Python 3.15.2، FFmpeg/FFprobe 7.1.1.
-- `n8n` و`rsvg-convert` غير متاحين في PATH. Homebrew 7.0.14 موجود. محاولة `brew install librsvg` توقفت بعد تعليق التنزيل عند `Downloading Homebrew API data`، وأوقفتها دون صلاحيات إدارية.
-- Git المحلي تهيأ في هذا المشروع؛ الـcommit المحلي الحالي يظهر بـ`git log -1 --oneline`.
-- لا توجد أسرار في Git. ملف قالب الاعتمادات يحفظ أسماء الحالات فقط.
+- المجلد: `/Users/aliadil/Projects/ContentFactory`، الفرع `main`؛ نقطة البداية كانت commit `fd44f67`.
+- لا تغييرات خارج مجلد المشروع. لا لمس لـStageCore أو Kids Studio، ولا نشر أو رفع محتوى. ماكو أسرار مضافة.
+- البيئة: macOS 27.0 / Apple Silicon M3 Max / ذاكرة 48 GB، مساحة حرة تقارب 199 GiB وقت الفحص. الأدوات الأساسية: Git 2.55.0، Node 24.21.0، Python 3.15.2، FFmpeg/FFprobe 7.1.1، librsvg/rsvg-convert 2.63.4. Python 3.12.9 موجود واستخدمته محلياً لصوت Piper. `n8n` و`espeak-ng` غير مثبتين.
+- المراجع والحزمة الأصلية تبقى تحت `lab/`. معاينتا librsvg السابقتان صالحتان تقنياً: `1080×1920`، `24fps`، `4s`، بلا صوت.
 
-## آخر بوابة وحالتها
+## اللي تهيّأ واختُبر بهالدفعة
 
-- بوابة فحص الملفات والبيئة: **PASS جزئي**. المرجع `ContentFactory_Implementation_Reference_AR.md` وقالب `ContentFactory_Credentials_Template.md` موجودان وقُرئا.
-- الحزمة `ContentFactory_Lab_2026-11-16.zip`: **PASS**. فحص CRC نجح لـ44 مدخلاً و2,795,408 بايت غير مضغوط؛ لا مسارات مطلقة/اجتياز مجلد ولا روابط رمزية. فُكّت إلى `lab/`.
-- توليد مصادر المشاهد: **PASS** بالأمر `cd lab && node motion.mjs`؛ ملفات SVG AR/EN موجودة تحت `lab/renders/`.
-- اختبار الحالة والاستئناف: **PASS** بالأمر `cd lab && python3 test_checkpoint.py`: timeout/retry، إزالة تكرار متزامن، حجب الحقوق غير المثبتة، حجب وجهة public، سقف الإعادة، واستعادة SQLite.
-- عينات MP4 المرفقة اجتازت FFprobe: H.264، 1080×1920، 24fps، 96 إطاراً، 4.0 ثوانٍ. هي أدلة سابقة داخل `lab/evidence/` وليست رندراً جديداً على هذا الماك.
-- الرندر الجديد: **BLOCKED**. `python3 lab/render.py` فشل لأن بناء FFmpeg الحالي لا يحتوي SVG decoder؛ `rsvg-convert` غير مثبت. أُضيف `lab/render_mac.py` ليحوّل SVG عبر librsvg ثم يرمّز ويفحص MP4 عبر FFprobe، مع إبقاء سكربت الحزمة الأصلي دون تعديل.
-- n8n: **BLOCKED / غير مثبت**؛ لذلك لم يُربط Workflow أو Data Tables ولم تُختبر دورة محلية عبر n8n. لم تُدخل اعتمادات.
-- الميزانية الخارجية صفر، النشر الخارجي معطّل، وStageCore وKids Studio خارج النطاق.
+- بيئة Piper `1.8.0` والنموذج الإنكليزي `en_US-ljspeech-medium` داخل `lab/voice-env` و`lab/models/`. ملفات تثبيت ومخازن التنزيل محلية للمشروع. نُزّل نموذج إنكليزي واحد فقط بعد فحص الحجم والترخيص؛ ما نُزّل نموذج عربي.
+- ملفات الصوت الموسومة `TEST_ONLY`: `lab/evidence/en-piper-ljspeech-TEST_ONLY.wav`، `ar-macos-majed-TEST_ONLY.wav`، `en-macos-samantha-TEST_ONLY.wav`، `en-macos-daniel-TEST_ONLY.wav`. القياسات والأحجام والبصمات وملاحظات المصدر والترخيص في `docs/evaluation-results.csv`؛ درجات السماع البشرية بعدها فارغة.
+- `lab/motion-canvas/` يحتوي المشهد القابل للتعديل ومشروع Motion Canvas `3.17.2`. التصدير من المحرر نجح إلى صور PNG محلية، وبعدها حُوّل بـFFmpeg. لقطتا العربية والإنكليزية اتراجعن بصرياً؛ تشكيل العربية صحيح وكل تسمية في مشهد EN إنكليزية.
+- ملفات الفيديو الموسومة `TEST_ONLY`: `lab/evidence/motion-canvas-ar-TEST_ONLY.mp4` و`motion-canvas-en-TEST_ONLY.mp4` و`motion-canvas-bilingual-TEST_ONLY.mp4`. راجعها بـFFprobe في التقرير. لا صوت في موشن Canvas.
+- `tools/record_media_evaluation.py` يسجل البصمة والحجم ومدة/مواصفات الوسيط ومصدره وترخيصه، ويترك درجات الجودة فارغة للمراجع البشري. التقرير الكامل والأوامر والمراجع الرسمية في `docs/LOCAL_AUDIO_MOTION_EVALUATION.md`.
+- نتيجة الاختبار: `cd lab/motion-canvas && npm audit` = صفر ثغرات؛ `npm run build` نجح (TypeScript وVite). تنبيه: توافق Vite 7 مع إضافة Motion Canvas مثبت محلياً بتعديل إعداد تجريبي، فيحتاج مراجعة قبل اعتماد build إنتاجي.
+- حالة الجودة: ما انحكم على وضوح النطق/طبيعية الصوت من القياسات وحدها. عينة Majed المحلية تخضع لترخيص macOS وغير مناسبة كأصل إنتاج للنشر التجاري. ماكو حالياً صوت عربي مفتوح المصدر ثبت أن ترخيصه واضح ومناسب؛ الفجوة العربية **مفتوحة**.
 
-## الأدلة والمخرجات
+## الملفات المتغيرة أو المضافة بهالدفعة
 
-- الشيفرات والمواد المفكوكة: `lab/`
-- معاينات الحزمة السابقة: `lab/evidence/librsvg-ar-TEST_ONLY.mp4` و`lab/evidence/librsvg-en-TEST_ONLY.mp4`
-- تقرير القياسات السابقة: `lab/evidence/motion-metrics.json`
-- مصادر SVG التي وُلّدت على هذا الماك: `lab/renders/ar/short/` و`lab/renders/en/short/`
-- سجل هذه الجولة وحالة Git: هذا الملف و`git log -1 --oneline`.
+- تحديث `.gitignore` لتجاهل البيئات والمخابئ والمخرجات المحلية.
+- إضافة `lab/motion-canvas/` (المشروع، lockfile، مشهد AR/EN وإعداد Vite).
+- إضافة `tools/record_media_evaluation.py`.
+- إضافة `docs/evaluation-texts.md` و`docs/evaluation-results.csv` و`docs/LOCAL_AUDIO_MOTION_EVALUATION.md`.
+- مخرجات WAV/MP4/PNG والنماذج وبيئات التثبيت تحت `lab/`؛ المستبعد منها من Git وفق `.gitignore`.
 
-## أول خطوة معلقة
+## أول خطوة معلّقة
 
-أعد تشغيل تثبيت librsvg من Terminal كمستخدم عادي؛ المحاولة السابقة علقت أثناء تنزيل بيانات Homebrew:
+استمع محلياً للعينات الأربع وسجّل حكم النطق والإيقاع والأخطاء في `docs/evaluation-results.csv` (الدرجات من 1 إلى 5، أو اتركها فارغة إذا ما ينطبق):
 
 ```sh
 cd /Users/aliadil/Projects/ContentFactory
-brew install librsvg
-python3 lab/render_mac.py
+afplay lab/evidence/ar-macos-majed-TEST_ONLY.wav
+afplay lab/evidence/en-piper-ljspeech-TEST_ONLY.wav
+afplay lab/evidence/en-macos-samantha-TEST_ONLY.wav
+afplay lab/evidence/en-macos-daniel-TEST_ONLY.wav
 ```
 
-المتوقع: إنشاء معاينتي AR/EN حديثتين في `lab/evidence/` واجتياز تحقق FFprobe المضمن. بعد ذلك افحصهما، وسجّل المدة والحجم والبصمات. إذا ظل Homebrew معلقاً، سجّل ذلك كعائق تثبيت وانقل طلب المساعدة لمشغّل الماك؛ لا تستخدم `sudo`.
+بعد التقييم البشري، الخطوة التالية هي البحث/الاختبار عن صوت عربي مفتوح المصدر بترخيص واضح للوزن ومجموعة البيانات، من دون تنزيله قبل فحص الحجم والاحتياجات. لا تختار جنس صوت مسبقاً؛ دوّن بيانات بطاقة الصوت وسبب اختيارها وثقة الاختيار بعد مقارنة السماع. راجع MP4s المحلية بمشغل فيديو وسجّل تقييم الحركة أيضاً.
 
-بعدها فقط، إذا تقرر إكمال ربط سير العمل، يلزم تثبيت n8n محلياً والتحقق من رخصته وملاءمته، ثم إعداد حساب المشغل ومفتاح التثبيت عبر واجهته/Keychain. لا تنسخ قيمة أي سر إلى Git أو المحادثة. استخدم العقد الجاهزة من n8n، ولا تنشئ Workflow قبل أن يصبح n8n متاحاً.
+## أوامر متابعة الموشن
+
+تشغيل المحرر على localhost فقط:
+
+```sh
+cd /Users/aliadil/Projects/ContentFactory/lab/motion-canvas
+npm run start -- --host 127.0.0.1 --port 9000 --strictPort
+```
+
+من الواجهة اضبط `1080×1920` و`24fps`، واضغط `RENDER`. تقرير الاختبارات والأوامر الكاملة: `docs/LOCAL_AUDIO_MOTION_EVALUATION.md`.
