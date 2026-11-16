@@ -1,0 +1,8 @@
+item,source,rights_evidence,state
+Original vector art, motion.mjs,created for this lab,test only
+Noto Sans Arabic,local font system,OFL see system copyright,fonts excluded from archive
+DejaVu Sans,local font system,DejaVu/Bitstream font terms,fonts excluded from archive
+Piper ljspeech-medium,https://huggingface.co/rhasspy/piper-voices/blob/e9ab671f2a0e50a701b34361136ba3e6a3a9eb0c/en/en_US/ljspeech/medium/MODEL_CARD,public-domain dataset and from-scratch training in card,EN research samples
+Piper kareem-medium,https://huggingface.co/rhasspy/piper-voices/blob/e9ab671f2a0e50a701b34361136ba3e6a3a9eb0c/ar/ar_JO/kareem/medium/MODEL_CARD,See URL and lessac base,on hold
+Habibi-TTS Specialized MSA,https://huggingface.co/SWivid/Habibi-TTS,per-model grant and voice permissions to verify,not used
+KittenTTS nano 0.8 int8,https://huggingface.co/KittenML/kitten-tts-nano-0.8-int8,Apache-2.0 model card,not used

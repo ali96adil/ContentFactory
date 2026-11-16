@@ -1,0 +1,24 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials.json
+n8n-data/
+
+# Downloaded lab archive and bundled evidence/media are kept locally, outside Git.
+ContentFactory_Lab_2026-11-16.zip
+lab/evidence/
+lab/repository/
+lab/ContentFactory-Lab.bundle
+lab/renders/
+lab/models/
+lab/deps/
+lab/research-deps/
+
+__pycache__/
+*.py[cod]

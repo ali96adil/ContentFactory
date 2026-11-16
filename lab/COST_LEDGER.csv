@@ -1,0 +1,7 @@
+stage,basis,time_s,extra_observation,external_paid_usd
+librsvg AR,total render and encode,1.82,local CPU,0
+librsvg EN,total render and encode,1.54,local CPU,0
+Inkscape AR,raster and encode,10.97,local CPU and 4 workers,0
+Inkscape EN,raster and encode,9.48,local CPU and 4 workers,0
+Piper EN,load voice,0.73,peak RSS 281456 KiB for benchmark process,0
+Piper EN,10 utterances process time excluding load and measuring,1.313,electricity and reviewer time unmeasured,0
