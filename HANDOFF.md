@@ -203,3 +203,23 @@ PY
 - الفحوص الأخيرة: `python3 tools/test_content_package_pipeline.py` PASS؛ `python3 -m py_compile tools/render_content_package.py tools/test_content_package_pipeline.py lab/render_mac.py` PASS؛ `node --check lab/motion.mjs` PASS؛ `git diff --check` PASS. الملفات المتعقبة المعدلة/المضافة: `README.md`, `HANDOFF.md`, `lab/motion.mjs`, `lab/render_mac.py`, `tools/render_content_package.py`, `tools/test_content_package_pipeline.py`. لا تُضف مجلدات الرندر أو fixture إلى Git.
 - إعادة التشغيل: استعمل اسم إخراج جديداً، مثلاً `lab/evidence/content-package-demo-TEST_ONLY-render-05`، مع الأمر أعلاه وبدّل `--output`. الاختبار: `python3 tools/test_content_package_pipeline.py`. للاستئناف بعد مقاطعة مقصودة/غير مكتملة، افحص `.content-package-demo-TEST_ONLY-render-05.work` ثم أعد الأمر مع `--resume`؛ لا تغيّر الإدخال أو إعداداته.
 - الخطوة التالية: افتح فيديوهَي Short والـCarousel والـStoryboard محلياً لحكم بشري على الخط والإيقاع وترجمة AR/EN، ثم حدّث حالة `review_gates` في نسخة العمل بعد المراجعة فقط. لا تشغّل n8n ولا تفتح بوابات الحقوق/الصوت/النشر من هذا الرندر. احتفظ ببيانات TEST_ONLY للتجارب وحدها.
+
+## استئناف 2026-11-17: تأهيل جودة رندر حزمة TEST_ONLY
+
+- بدأت من أحدث commit فعلي `875f564` على `main`، وحالة Git كانت نظيفة. قرأت التعليمات وهذا الملف، وفحصت `lab/evidence/content-package-demo-TEST_ONLY-render-04/artifacts/`. ما شغّلت n8n، ولا اتصلت بحساب، ولا نشرت محتوى أو أضفت صوتاً.
+- أضفت `tools/review_content_package_render.py` بأدوات Python وFFmpeg/FFprobe و`rsvg-convert` الموجودة فقط. يفحص فك H.264 والأبعاد والمدة والإطارات وFPS والصوت، مقاسات PNG وعدد الشرائح واللوحات، manifest، ووسم TEST_ONLY وأسماء الملفات. ينشئ Contact Sheet واحداً يضم أربع لقطات زمنية من كل Short وكل شرائح Carousel ولوحات Storyboard. ما ثبّت اعتماديات.
+- ملف المعاينة النهائي: `lab/evidence/content-package-demo-TEST_ONLY-review-02/content-package-contact-sheet-TEST_ONLY.png`. قائمة المستخدم: `human-review-TEST_ONLY.md`؛ النتائج التقنية: `technical-checks-TEST_ONLY.json`. جميع قيم وضوح النص واتجاه العربية والتباين والقص وتنوع الحركة والإيقاع والهوية والترجمة «بانتظار مراجعة المستخدم»؛ ما أعطيت درجة بشرية.
+- ظهر في `review-01` تداخل أسماء ملفات Storyboard الطويلة أسفل مصغرات Contact Sheet. عدّلت labels في أداة المعاينة إلى `Panel 01`/`Slide 01` مع إظهار اللغة في عنوان المجموعة، وأنتجت `review-02` باسم جديد؛ المخرجات القديمة بقيت كما هي. بالفحص البصري للـcontact sheet وعينات بالحجم الكامل من Carousel العربية وStoryboard العربية، ما ظهر قص أو خلل RTL موضوعي في المجموعة `render-04`؛ لذلك ما غيّرت نص الرندر أو معناه وما احتجت إعادة إنتاج ميديا. التباين واضح بالعينات، أما اعتماده فيبقى للمستخدم.
+- فحوص `review-02` الفعلية: 7 من 7 PASS. الفيديوهان كلاهما H.264، `1080×1920`, 24fps، 120 إطاراً، 5.0 ثانية، والصوت 0 streams؛ فك الترميز بـFFmpeg نجح. أخذت 4 لقطات من كل فيديو، وكلها متميزة (فحص آلي يؤكد تغيّر الصورة عبر الزمن، مو تقييم سلاسة). عشر شرائح Carousel `1080×1350`، و12 لوحة Storyboard `1920×1080`. 28 ملفاً مفحوصاً، وأسماء الميديا موسومة `TEST_ONLY` وخالية من كلمات مثل `final` و`production` و`approved`؛ تقرير الرندر يؤكد تعطيل النشر والصوت. الحالة `PENDING_USER_REVIEW`.
+- قست الرندر السابق المحفوظ نفسه `render-04`: 40.211 ثانية، CPU أبناء 30.587 user + 3.592 system، ذروة RSS 432.47 MiB، مجموع 2,555,498 بايت لـ26 مخرجاً. المقارنة مع `render-03` عادلة تقريباً كتشغيلين متقاربين: نفس الحزمة والإعدادات ومجموعة 5 ثوانٍ؛ `render-03` كان 40.444 ثانية و30.766 + 3.592 CPU و432.92 MiB و2,554,341 بايت. الفرق صغير، وهي قراءة تشغيلين وليست benchmark مضبوطاً. أداة المعاينة نفسها لا تعيد الرندر.
+- الفحص الحالي لمسار الإعادة/الاستئناف/منع الاستبدال هو `python3 tools/test_content_package_pipeline.py`: يجب أن يرفض المدخل والحزمة الناقصين، يستأنف بعد المقاطعة، ويرفض استبدال المخرج. يترك الميديا السابقة كما هي. أمر فحص وإنشاء معاينة جديدة:
+
+```sh
+python3 tools/review_content_package_render.py \
+  --artifacts lab/evidence/content-package-demo-TEST_ONLY-render-04/artifacts \
+  --output lab/evidence/content-package-demo-TEST_ONLY-review-03
+open lab/evidence/content-package-demo-TEST_ONLY-review-03/content-package-contact-sheet-TEST_ONLY.png
+python3 tools/test_content_package_pipeline.py
+```
+
+- تظل معاينة الحركة الزمنية محدودة: راجعت لقطات موزعة وأكدت تغير العناصر، لكن ما قيّمت سلاسة التشغيل بمشاهدة متصلة. يلزم المستخدم أن يشاهد الفيديوين فعلياً ويراجع الإيقاع وتنوع الحركة وجودة AR/EN. حقوق العينة والجودة والصوت والتصدير والنشر غير معتمدة؛ الصوت العربي الطبيعي المرخص تجارياً ما زال فجوة.

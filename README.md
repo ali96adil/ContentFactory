@@ -38,3 +38,16 @@ python3 tools/test_content_package_pipeline.py
 ```
 
 اختر اسم مخرج جديداً كل مرة؛ الأداة ترفض الكتابة فوق مجلد موجود. إذا انقطع توليد SVG، أعد الأمر نفسه مع `--resume` بعد فحص مجلد `.work` الخاص بالتجربة. المخرجات كاملةً موسومة `TEST_ONLY` ومستثناة من Git.
+
+## مراجعة جودة TEST_ONLY
+
+لإنشاء ورقة معاينة واحدة وفحوص FFprobe وPNG آلية للرندر الموجود:
+
+```sh
+python3 tools/review_content_package_render.py \
+  --artifacts lab/evidence/content-package-demo-TEST_ONLY-render-04/artifacts \
+  --output lab/evidence/content-package-demo-TEST_ONLY-review-03
+open lab/evidence/content-package-demo-TEST_ONLY-review-03/content-package-contact-sheet-TEST_ONLY.png
+```
+
+الورقة تجمع أربع لقطات من كل Short، وكل شرائح Carousel، وكل لوحات Storyboard. ملف `human-review-TEST_ONLY.md` يبقي وضوح النص واتجاه العربية والتباين والقص والحركة والإيقاع والهوية والترجمة بانتظار مراجعتك. لا تمنح الفحوص الآلية اعتماد جودة بشرية. استخدم مجلد إخراج جديداً عند كل تشغيل لأن الأداة ترفض الاستبدال. لفحوص إعادة التشغيل والاستئناف ومنع الاستبدال شغّل `python3 tools/test_content_package_pipeline.py`.
