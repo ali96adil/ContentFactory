@@ -138,3 +138,13 @@ N8N_LISTEN_ADDRESS=127.0.0.1 N8N_HOST=127.0.0.1 N8N_PORT=5678 N8N_PROTOCOL=http 
 - تحققت بنيوياً من الملف: رؤوس الأعمدة مطابقة للأداة، 28 صف بيانات، لكل منصة 1 candidate و6 baseline، وحقول القياس/الحساسية فارغة؛ وتأكدت من تجاهله بواسطة Git. لم أشغل محلل الأداء على القالب الفارغ، ولم أتصل بحسابات أو منصات.
 - الملفات: قالب محلي مستثنى `lab/imports/platform-metrics-24h.csv`؛ شرح متعقب `docs/PLATFORM_METRICS_INPUT_GUIDE.md`؛ هذا التحديث لـ`HANDOFF.md`.
 - الخطوة التالية: افتح القالب محلياً ببرنامج جداول، واملأه من تقاريرك المصرح بها وفق `docs/PLATFORM_METRICS_INPUT_GUIDE.md`. إذا لم توفر المنصة حقلاً رقمياً مطلوباً مثل impressions أو saves، اتركه فارغاً ولا تشغّل المحلل ولا تخمّن قيمة؛ أوقف ذلك الصف لحين تقرير لاحق عن توافق الأداة.
+
+## استئناف 2026-11-17: اختبار TEST_ONLY لمحلل الأداء
+
+- بدأت على `main` عند commit `b685caf`؛ راجعت HANDOFF والمحلل والقالب. لم أستخدم حسابات أو بيانات أداء من الإنترنت، ولم أنشر أو أتصل بأي منصة.
+- أبقيت `lab/imports/platform-metrics-24h.csv` بدون تغيير. هو قالب تعبئة من 28 صفاً (وليس ملفاً بلا صفوف): 4 منصات مع aliases وأدوار جاهزة، وكل قياسات الأداء والتاريخ والحقول الحساسة فارغة. تحقق مستقل أكد ذلك قبل وبعد التشغيل.
+- أنشأت fixture مستقلة `lab/evidence/platform-metrics-TEST_ONLY.csv` تضم 28 صفاً اصطناعياً كاملاً: لكل منصة مرشح واحد وستة baseline، بمعرفات مثل `account_yt_test` و`post_yt_test_01`، وكل صف موسوم `data_origin=synthetic_TEST_ONLY`. لم أغير المحلل لأن حاجز `synthetic`/`TEST_ONLY` كان موجوداً بالفعل.
+- أمر التشغيل الوحيد للمحلل كان على fixture التجريبية: `python3 tools/analyze_platform_metrics.py lab/evidence/platform-metrics-TEST_ONLY.csv --output lab/evidence/platform-metrics-TEST_ONLY-result.json`.
+- النتيجة PASS: `mode=TEST_ONLY_SYNTHETIC`، 28 صفاً، 4 candidates، وكل التوصيات `test_only_no_action`؛ `scale_eligible=false`, `export_allowed=false`, `publish_allowed=false`. تحققنا برمجياً من القيم بعد إنشاء النتيجة.
+- ملفات الإدخال والنتيجة تحت `lab/evidence/` مستثناة بـ`.gitignore`؛ القالب الحقيقي مستثنى عبر `.git/info/exclude`. لن تدخل بيانات الاختبار أو الإدخال الحقيقي في Git. ماكو أسرار أو حسابات أو اتصال خارجي.
+- الخطوة التالية: اختبار آخر إن رغبت، أو ابدأ تعبئة القالب الحقيقي يدوياً من بيانات مصرح بها. لا تستخدم fixture كأداء فعلي ولا تتخذ منها قرار نشر/توسع.
