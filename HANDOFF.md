@@ -182,3 +182,24 @@ PY
 
 - الملفات المضافة/المعدلة: `lab/templates/content-package-template.json`, `lab/evidence/content-package-demo-TEST_ONLY.json` (ignored محلياً), `docs/CONTENT_PACKAGE_CONTRACT.md`, `README.md`, و`HANDOFF.md`. هذه دفعة عقد وتوثيق؛ لا كود تشغيل جديد.
 - الخطوة التالية: بناء adapter محلي صغير يقرأ حزمة JSON **بعد اعتمادها** ويغذي `lab/motion.mjs` أو مشهد Motion Canvas الحالي؛ قبل ذلك حدد أي renderer تريد وصمم ربطاً لا يفتح بوابة نشر. لا تُنشئ حسابات ولا تشغّل n8n.
+
+## استئناف 2026-11-17: مسار محلي من الحزمة إلى المخرجات
+
+- بدأت من `main` عند أحدث commit فعلي `7018f78`، وكانت الشجرة نظيفة. راجعت HANDOFF والعقد `lab/templates/content-package-template.json` وعينة `lab/evidence/content-package-demo-TEST_ONLY.json` والرندر `lab/motion.mjs` وأدوات SVG/FFmpeg/FFprobe. ما شغّلت n8n، ولا اتصلت بمنصة، وما لمست StageCore أو Kids Studio.
+- أضفت `tools/render_content_package.py` كمحوّل/مدقق صغير يربط العقد بالرندر الموجود. يرفض الحزمة غير المكتملة، اللغة أو التنسيق غير المدعوم، وغياب وسم TEST_ONLY، أو إعدادات حساب/نشر؛ ويتحقق من ادعاءات الحقائق والأصول المرخصة وبصمتها إذا وُجدت. يقصر المدخلات على `lab/` والمخرجات على `lab/evidence/`، ويرفض استبدال المخرج. يكتب حالة مرحلة وبصمة إدخال لاستئناف آمن بعد الانقطاع.
+- وسّعت `lab/motion.mjs` ليقرأ خطة المحوّل، مع الإبقاء على وضع الرندر القديم بلا معاملات. `lab/render_mac.py` يستخدم `rsvg-convert` وFFmpeg وFFprobe الموجودة لإنتاج الوسائط والميتاداتا. لا توجد أصول خارجية؛ رسمة الكوب SVG محلية. أصلحت اتجاه دعوة الإجراء العربية بعد أن أظهر الفحص البصري قصّاً عند حافة الإطار.
+- أنشأت `tools/test_content_package_pipeline.py` لاختبار ملف إدخال مفقود، حزمة ناقصة، مقاطعة توليد SVG ثم الاستئناف، ورفض استبدال تقرير موجود. الاختبار يستخدم مؤقتاً داخل `lab/evidence/` ويحذفه بعده. النتيجة الفعلية: PASS؛ نتج Shortان صامتان و10 شرائح Carousel ومخططا Storyboard، وكل بوابات النشر والصوت `false`.
+- الرندر النهائي المحلي الحالي موجود في `lab/evidence/content-package-demo-TEST_ONLY-render-04/` (مستثنى من Git). التقرير: `artifacts/render-report.json`. أمره:
+
+```sh
+/usr/bin/time -l python3 tools/render_content_package.py \
+  --input lab/evidence/content-package-demo-TEST_ONLY.json \
+  --output lab/evidence/content-package-demo-TEST_ONLY-render-04 \
+  --platform all --preview-seconds 5
+```
+
+- النتيجة المقاسة: زمن 40.211 ثانية؛ CPU للأبناء 30.587 ثانية user و3.592 ثانية system؛ ذروة RSS المسجلة 432.47 MiB. خرجا الفيديو `artifacts/short-ar-TEST_ONLY.mp4` و`artifacts/short-en-TEST_ONLY.mp4`، كل واحد 1080×1920 و24fps و5 ثوانٍ/120 إطاراً، بلا صوت؛ حجماهما 119,579 و128,708 بايت. Carousel: 5 PNG لكل لغة، 1080×1350؛ Storyboard: 6 لوحات PNG لكل لغة بدقة 1920×1080 وملف Markdown لكل لغة. مجموع أحجام مخرجات التقرير الـ26 نحو 2.44 MiB؛ التقرير يسجل حجم كل عنصر.
+- راجعت إطارات Short العربية والإنكليزية، شرائح Carousel عربية، ولوحة Storyboard عربية. معالجة RTL/تشكيل Geeza Pro ظاهرة والنصوص المقروءة في العينات المحددة داخل الإطار بتباين واضح. هذا فحص بصري جزئي؛ يلزم حكم بشري على جمال الحركة، تقطيع الأسطر، ملاءمة المحتوى والترجمة واتساق النص. نسخة Short معاينة 5 ثوانٍ من هدف 20 ثانية؛ لا صوت ولا حلقة YouTube نهائية. ادعاءات/حقوق العينة غير معتمدة، والجودة تنتظر مراجعة بشرية. الصوت العربي الطبيعي المرخص تجارياً ما زال فجوة مفتوحة.
+- الفحوص الأخيرة: `python3 tools/test_content_package_pipeline.py` PASS؛ `python3 -m py_compile tools/render_content_package.py tools/test_content_package_pipeline.py lab/render_mac.py` PASS؛ `node --check lab/motion.mjs` PASS؛ `git diff --check` PASS. الملفات المتعقبة المعدلة/المضافة: `README.md`, `HANDOFF.md`, `lab/motion.mjs`, `lab/render_mac.py`, `tools/render_content_package.py`, `tools/test_content_package_pipeline.py`. لا تُضف مجلدات الرندر أو fixture إلى Git.
+- إعادة التشغيل: استعمل اسم إخراج جديداً، مثلاً `lab/evidence/content-package-demo-TEST_ONLY-render-05`، مع الأمر أعلاه وبدّل `--output`. الاختبار: `python3 tools/test_content_package_pipeline.py`. للاستئناف بعد مقاطعة مقصودة/غير مكتملة، افحص `.content-package-demo-TEST_ONLY-render-05.work` ثم أعد الأمر مع `--resume`؛ لا تغيّر الإدخال أو إعداداته.
+- الخطوة التالية: افتح فيديوهَي Short والـCarousel والـStoryboard محلياً لحكم بشري على الخط والإيقاع وترجمة AR/EN، ثم حدّث حالة `review_gates` في نسخة العمل بعد المراجعة فقط. لا تشغّل n8n ولا تفتح بوابات الحقوق/الصوت/النشر من هذا الرندر. احتفظ ببيانات TEST_ONLY للتجارب وحدها.
