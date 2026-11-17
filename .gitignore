@@ -26,6 +26,9 @@ lab/.uv-cache/
 lab/motion-canvas/node_modules/
 lab/motion-canvas/output/
 lab/motion-canvas/.vite/
+lab/n8n-local/node_modules/
+lab/n8n-local/.npm-cache/
+lab/n8n-local/data/
 
 __pycache__/
 *.py[cod]

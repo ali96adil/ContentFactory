@@ -6,7 +6,7 @@
 
 - المجلد: `/Users/aliadil/Projects/ContentFactory`، الفرع `main`؛ نقطة البداية كانت commit `fd44f67`، والدفعات السابقة محفوظة حتى commit `654475b`.
 - لا تغييرات خارج مجلد المشروع. لا لمس لـStageCore أو Kids Studio، ولا نشر أو رفع محتوى. ماكو أسرار مضافة.
-- البيئة: macOS 27.0 / Apple Silicon M3 Max / ذاكرة 48 GB، مساحة حرة تقارب 199 GiB وقت الفحص. الأدوات الأساسية: Git 2.55.0، Node 24.21.0، Python 3.15.2، FFmpeg/FFprobe 7.1.1، librsvg/rsvg-convert 2.63.4. Python 3.12.9 موجود واستخدمته محلياً لصوت Piper. `n8n` و`espeak-ng` غير مثبتين.
+- البيئة: macOS 27.0 / Apple Silicon M3 Max / ذاكرة 48 GB، مساحة حرة تقارب 199 GiB وقت الفحص. الأدوات الأساسية: Git 2.55.0، Node 24.21.0، Python 3.15.2، FFmpeg/FFprobe 7.1.1، librsvg/rsvg-convert 2.63.4. Python 3.12.9 موجود واستخدمته محلياً لصوت Piper. الحالة الحالية لـ`n8n@2.47.7` هي تثبيت محلي تحت `lab/n8n-local` لكن الخدمة متوقفة بسبب نتائج `npm audit`؛ التفاصيل والأوامر بأسفل الملف. `espeak-ng` غير مثبت.
 - المراجع والحزمة الأصلية تبقى تحت `lab/`. معاينتا librsvg السابقتان صالحتان تقنياً: `1080×1920`، `24fps`، `4s`، بلا صوت.
 
 ## اللي تهيّأ واختُبر بهالدفعة
@@ -91,3 +91,23 @@ npm run start -- --host 127.0.0.1 --port 9000 --strictPort
 ```
 
 من الواجهة اضبط `1080×1920` و`24fps`، واضغط `RENDER`. تقرير الاختبارات والأوامر الكاملة: `docs/LOCAL_AUDIO_MOTION_EVALUATION.md`.
+
+## استئناف 2026-11-17: تهيئة n8n محلياً
+
+- بداية هذه الخطوة كانت على `main` عند `517f805` وبحالة نظيفة. Node `v24.21.0` وnpm `11.19.0` على `darwin arm64`، و197 GiB متاحة. n8n مثبت بنسخة ثابتة `2.47.7` داخل `lab/n8n-local` (`package.json` و`package-lock.json`)؛ لا تثبيت عالمي ولا Docker ولا `sudo`. هذه النسخة آخر stable التي أظهرها `npm view n8n@latest` أثناء الفحص؛ سجل الإصدار الرسمي يذكر نشرها 2026-11-13.
+- التثبيت شمل 2,259 حزمة أول مرة، استغرق 34 دقيقة، ثم تحديث patch إلى 2.47.7 استغرق 5 دقائق. الحجم المحلي وقت الفحص: `node_modules` نحو 2.5 GiB، npm cache نحو 1.3 GiB، وبيانات SQLite المحلية نحو 54 MiB. مخبأ npm والإعدادات والبيانات تحت المشروع ومضافة إلى `.gitignore`؛ لا تضع محتواها في Git.
+- ملاحظة صريحة: أول محاولة npm استخدمت cache الافتراضي خارج المشروع قبل أن ألاحظ ذلك؛ أوقفتها، ونقلت التثبيت الناجح ومخه إلى `lab/n8n-local/.npm-cache`. قد تكون محاولة التوقف أضافت عناصر cache إلى `~/.npm`؛ لم أمسح مخزن المستخدم العام كي لا أحذف cache سابقاً أو مشتركاً. لم تتغير إعدادات نظام أو حزم نظام.
+- نسخة npm تذكر `SEE LICENSE IN LICENSE.md`. ترخيص المصدر المرفق هو Sustainable Use License 1.0؛ يسمح باستخدام البرامج لأغراض العمل الداخلية، لكنه ليس Apache/MIT ولا يمنح حق تشغيل n8n كخدمة مستضافة للغير أو إعادة بيعه. راجع [الترخيص عند tag 2.47.7](https://github.com/n8n-io/n8n/blob/n8n%402.47.7/LICENSE.md) و[تعليمات npm الرسمية](https://docs.n8n.io/hosting/installation/npm/)؛ الوثائق الحالية تحدد Node `20.19` إلى `24.x`، وتحذر من إهمال طريقة npm بدءاً من n8n 3.0. المصدر الرسمي يسجل إصدار `2.47.7` بتاريخ 2026-11-13: [release](https://github.com/n8n-io/n8n/releases/tag/n8n%402.47.7).
+- الأمر `node lab/n8n-local/node_modules/n8n/bin/n8n --version` رجع `2.47.7`، و`npm --prefix lab/n8n-local ls n8n --depth=0` أكد الإصدار. شغّلت الخدمة مع `N8N_LISTEN_ADDRESS=127.0.0.1` و`N8N_HOST=127.0.0.1` و`N8N_PORT=5678` و`N8N_USER_FOLDER=$PWD/lab/n8n-local/data`، وعطّلت diagnostics/personalization/version notifications/templates. فحص `curl http://127.0.0.1:5678/` رجع `HTTP 200`، و`lsof` أكد أن 5678 و5679 يستمعان على `127.0.0.1` فقط. الإصدار 2.47.7 أقلع وبنى SQLite، وعرض الواجهة؛ الفهرس أكد 0 workflows. بعدها أوقفت الخدمة بـ`Ctrl+C`، فالمنافذ حالياً غير مستمعة.
+- لا حساب مالك أُنشئ، ولا Workflow مستورد، ولا اتصال حسابات، ولا أسرار أُضيفت. `data/.n8n/config` يحوي مفتاح التشفير الذي أنشأه n8n تلقائياً؛ بقي محلياً ومستثنى من Git.
+- تدقيق `npm --prefix lab/n8n-local audit --cache "$PWD/lab/n8n-local/.npm-cache" --omit=dev --json` سجّل: 145 advisory (2 منخفضة، 67 متوسطة، 69 عالية، 7 حرجة). ما شغّلت `npm audit fix` أو `--force`؛ اقترح npm تثبيت n8n `1.17.0` كتغيير مكسور/رجوع إصدار، وهذا غير مقبول. لا تترك الخدمة قيد التشغيل قبل مراجعة التنبيهات وتوفر تحديث مناسب. ظهرت أيضاً تعارضات peer/deprecation، وتحذير من 15 install scripts غير مغطاة بسياسة `allowScripts`؛ الإقلاع والواجهة نجحا رغم ذلك. لا توافق scripts جماعياً قبل مراجعة كل واحدة.
+- حدود النسخة: JavaScript Task Runner تسجل واشتغل؛ Python task runner لم يبدأ لأن بيئته المعزولة غير موجودة. سجل n8n يحذر أن تشغيل npm مباشرة على المضيف سيُلغى في إصدار مستقبلي ويتطلب Docker؛ لا تثبت Docker حسب التوجيه، وأعد تقييم n8n قبل أي ترقية مستقبلية.
+
+لتشغيله يدوياً من جذر المشروع بعد مراجعة التنبيهات:
+
+```sh
+cd /Users/aliadil/Projects/ContentFactory
+N8N_LISTEN_ADDRESS=127.0.0.1 N8N_HOST=127.0.0.1 N8N_PORT=5678 N8N_PROTOCOL=http N8N_USER_FOLDER="$PWD/lab/n8n-local/data" N8N_DIAGNOSTICS_ENABLED=false N8N_PERSONALIZATION_ENABLED=false N8N_VERSION_NOTIFICATIONS_ENABLED=false N8N_TEMPLATES_ENABLED=false ./lab/n8n-local/node_modules/.bin/n8n start
+```
+
+افتح `http://127.0.0.1:5678`. الإيقاف: `Ctrl+C` في نفس الطرفية. الاستئناف: أعد أمر التشغيل أعلاه. أول خطوة معلقة: راجع قائمة advisories للإصدار المثبت وتحقق من release ثابت أحدث يعالجها، بدون `npm audit fix --force`؛ أعد `npm audit` ثم اختبر الإقلاع والواجهة قبل أي Workflow. لا تستورد Workflow أو تضف Credentials حتى تُراجع التنبيهات وتُفعّل الحاجة صراحةً.
