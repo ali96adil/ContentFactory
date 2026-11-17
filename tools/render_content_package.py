@@ -235,6 +235,7 @@ def run(args: argparse.Namespace) -> int:
         raise PackageError("output directory name must contain TEST_ONLY")
     package = json.loads(input_path.read_text(encoding="utf-8"))
     plan = validate_package(package, input_path, args.platform, args.preview_seconds)
+    plan["visual_direction"] = args.visual_direction
     source_hash = sha256(input_path)
     plan["package_sha256"] = source_hash
     plan["topic"] = package["topic"]
@@ -251,7 +252,8 @@ def run(args: argparse.Namespace) -> int:
             raise PackageError(f"cannot resume: missing job state file {job_path}")
         job = json.loads(job_path.read_text(encoding="utf-8"))
         if (job.get("source_sha256") != source_hash or job.get("platform_selection") != args.platform
-                or job.get("preview_seconds") != args.preview_seconds):
+                or job.get("preview_seconds") != args.preview_seconds
+                or job.get("visual_direction", "editorial") != args.visual_direction):
             raise PackageError("resume refused: input package or platform selection changed")
     else:
         if args.resume:
@@ -260,7 +262,8 @@ def run(args: argparse.Namespace) -> int:
         job = {
             "package_id": plan["package_id"], "source_name": input_path.name,
             "source_sha256": source_hash, "platform_selection": args.platform,
-            "publication_enabled": False, "created_at_utc": now_utc(), "stage": "initialized",
+            "visual_direction": args.visual_direction, "publication_enabled": False,
+            "created_at_utc": now_utc(), "stage": "initialized",
             "elapsed_seconds_accumulated": 0.0, "preview_seconds": args.preview_seconds,
         }
         atomic_json(job_path, job)
@@ -310,7 +313,8 @@ def run(args: argparse.Namespace) -> int:
         report = {
             "mode": "TEST_ONLY_LOCAL_PREVIEW", "package_id": job["package_id"],
             "source_package": job["source_name"], "source_sha256": source_hash,
-            "platform_selection": args.platform, "languages": list(LOCALES), "fps": FPS,
+            "platform_selection": args.platform, "visual_direction": args.visual_direction,
+            "languages": list(LOCALES), "fps": FPS,
             "preview_duration_seconds": args.preview_seconds,
             "target_duration_seconds": min(plan["copy"][locale]["short_video"]["target_duration_seconds"] for locale in LOCALES),
             "audio_present": False, "fact_gate": "BLOCKED_OR_UNREVIEWED",
@@ -338,6 +342,8 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--platform", choices=("all", *sorted(PLATFORMS)), default="all")
+    parser.add_argument("--visual-direction", choices=("editorial", "spotlight"), default="editorial",
+                        help="TEST_ONLY visual template: high-contrast editorial paper or dark spotlight")
     parser.add_argument("--preview-seconds", type=int, default=5,
                         help="silent visual excerpt length; defaults to 5 seconds and never exceeds package target")
     parser.add_argument("--resume", action="store_true")

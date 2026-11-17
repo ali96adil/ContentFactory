@@ -51,3 +51,16 @@ open lab/evidence/content-package-demo-TEST_ONLY-review-03/content-package-conta
 ```
 
 الورقة تجمع أربع لقطات من كل Short، وكل شرائح Carousel، وكل لوحات Storyboard. ملف `human-review-TEST_ONLY.md` يبقي وضوح النص واتجاه العربية والتباين والقص والحركة والإيقاع والهوية والترجمة بانتظار مراجعتك. لا تمنح الفحوص الآلية اعتماد جودة بشرية. استخدم مجلد إخراج جديداً عند كل تشغيل لأن الأداة ترفض الاستبدال. لفحوص إعادة التشغيل والاستئناف ومنع الاستبدال شغّل `python3 tools/test_content_package_pipeline.py`.
+
+## اتجاهات الحركة — TEST_ONLY
+
+للمقارنة افتح ورقتي [Editorial](lab/evidence/content-package-demo-TEST_ONLY-direction-editorial-v3-review-02/content-package-contact-sheet-TEST_ONLY.png) و[Spotlight](lab/evidence/content-package-demo-TEST_ONLY-direction-spotlight-v3-review-02/content-package-contact-sheet-TEST_ONLY.png). الاختيار التجريبي الحالي هو `spotlight` بسبب الحركة الأوضح وتباين ألوان النص الأعلى؛ قرار الجودة النهائي ينتظر المستخدم. مقارنة المعايير والأرقام في `design-direction-decision-TEST_ONLY.md` داخل مجلد المراجعة الأخير.
+
+الفيديوهان المختاران:
+
+```sh
+open -a "QuickTime Player" lab/evidence/content-package-demo-TEST_ONLY-direction-spotlight-v3/artifacts/short-ar-TEST_ONLY.mp4
+open -a "QuickTime Player" lab/evidence/content-package-demo-TEST_ONLY-direction-spotlight-v3/artifacts/short-en-TEST_ONLY.mp4
+```
+
+قائمة مراجعة المستخدم `human-review-TEST_ONLY.md` في مجلد `direction-spotlight-v3-review-02`؛ كل البنود بانتظار التقييم البشري. المخرجات صامتة، بوابات الحقائق والحقوق والجودة والتصدير والنشر مغلقة، ولا تمثل اعتماداً للإنتاج.

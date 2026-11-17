@@ -103,7 +103,7 @@ def run(args: argparse.Namespace) -> dict:
             command(["ffmpeg", "-v", "error", "-i", str(path), "-f", "null", "-"])
             video_info[lang] = {"duration_seconds": duration, "width": video["width"], "height": video["height"], "fps": fps, "frames": frames, "codec": video["codec_name"], "audio_streams": len(audio_streams), "bytes": path.stat().st_size}
             checks.append({"check": f"short_{lang}_metadata_and_decode", "status": "PASS"})
-            sample_times = (0.2, 1.7, 3.3, 4.8)
+            sample_times = (0.5, 2.4, 4.0, 4.8)
             hashes = set()
             for index, seconds in enumerate(sample_times, 1):
                 thumb = temp / f"short-{lang}-{index}.jpg"
@@ -154,7 +154,7 @@ def run(args: argparse.Namespace) -> dict:
         sections = []
         for lang in LANGUAGES:
             language_label = "العربية البيضاء" if lang == "ar" else "English"
-            sections.append((f"Short • {language_label}", [thumbs[f"short-{lang}-{i}"] for i in range(1, 5)], 4, 400, 430, ["0.2s", "1.7s", "3.3s", "4.8s"]))
+            sections.append((f"Short • {language_label}", [thumbs[f"short-{lang}-{i}"] for i in range(1, 5)], 4, 400, 430, ["0.5s", "2.4s", "4.0s", "4.8s"]))
         for lang in LANGUAGES:
             language_label = "العربية البيضاء" if lang == "ar" else "English"
             sections.append((f"Carousel • {language_label}", [thumbs[path.stem] for path in carousels[lang]], 5, 320, 315, [f"Slide {index:02d}" for index in range(1, 6)]))
@@ -182,7 +182,7 @@ def run(args: argparse.Namespace) -> dict:
     review_rows = [
         "| معيار المراجعة البشرية | الحالة | ملاحظات المستخدم |",
         "|---|---|---|",
-        *[f"| {name} | بانتظار مراجعة المستخدم | |" for name in ("وضوح النص", "سلامة اتجاه العربية", "التباين", "القص", "تنوع الحركة", "الإيقاع", "اتساق الهوية", "جودة الترجمة")],
+        *[f"| {name} | بانتظار مراجعة المستخدم | |" for name in ("وضوح النص", "حجم النص وتوزيعه", "سلامة اتجاه العربية والتشكيل", "التباين", "قص النص والعناصر", "تنوع الحركة", "سلاسة الحركة بالتشغيل المتصل", "الإيقاع", "الذوق البصري", "تماسك تسلسل Carousel", "وضوح Storyboard", "جودة الترجمة")],
     ]
     (output / "human-review-TEST_ONLY.md").write_text(
         "# قائمة مراجعة بشرية — TEST_ONLY\n\nلم تُسجّل درجة جودة بشرية آلياً. اكتب الملاحظات بعد مشاهدة المعاينة ومراجعة النصين.\n\n"
