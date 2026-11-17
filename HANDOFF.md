@@ -29,7 +29,9 @@
 
 ## أول خطوة معلّقة
 
-الاختبار متوقف عند مصدر بيانات التدريب: لا تنزيل أو تثبيت لـNabra حتى يقدّم الناشر توثيقاً يوضح بيانات التدريب ورخصتها ومصدر التسجيل. صفحة وزن ONNX تعلن Apache-2.0، لكنها ترجع إلى نموذج Nabra الأساسي ولا تسد فجوة بيانات التدريب. ما يحتاج قراراً من المستخدم حالياً؛ إذا ظهر توثيق رسمي واضح، أعد فحص المتطلبات والأحجام أولاً، ثم ثبّت حصراً داخل `lab/voice-env` ونزّل ملف النموذج `83.2 MB` وملف الصوت اللازم فقط.
+الهدف الصوتي الحالي هو صوت عربي أبيض قريب من الفصحى المبسطة، مفهوم لأوسع جمهور وبإيقاع طبيعي بشري. لا صوت عربي صالح تجارياً وموثق المصدر حالياً؛ لا تختبر/تنزّل مرشحاً حتى تتضح حقوق بيانات التدريب والتسجيلات. Habibi IRQ/Lahgtna لا يُنزّلان حسب حالة المستخدم. تفاصيل المرشحين المفتوحين في [`docs/WHITE_ARABIC_VOICE_CANDIDATES.md`](docs/WHITE_ARABIC_VOICE_CANDIDATES.md).
+
+أقرب خطوة سير محلية بعد الموشن هي تحليل ملف أداء تجريبي يدوي، لأن ماكو قياسات حسابات حقيقية. الأداة أصبحت موجودة في `tools/analyze_platform_metrics.py`، وعينة TEST_ONLY ونتيجة التشغيل في `lab/fixtures/` و`lab/evidence/`. النتيجة الاصطناعية ممنوع استخدامها كدليل سوق أو قرار توسع. فحص خط الإنتاج والمخرجات في [`docs/LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md).
 
 سبق أن جُرّب الأمر التالي داخل بيئة المشروع، لكنه لم يتقدم لأكثر من دقيقتين وأُوقف قبل تثبيت أي حزمة؛ لا تعاوده قبل إزالة عائق الترخيص وفحص سلوك التنزيل:
 
@@ -49,8 +51,8 @@ uv pip install --python lab/voice-env/bin/python torch==2.15.0 misaki==0.9.4 esp
 - مواصفات الجهاز/المساحة: `arm64`, `Mac15,9`, RAM `48 GiB`, free space `197 GiB`. الحجم البعيد المعلن لـHabibi IRQ `1.35 GB` و`vocab.txt` `11.8 kB`؛ لم تُنشأ بصمات محلية لأن الملفات لم تُنزّل.
 - فُحصت `lab/voice-env` كما هي: Python `3.12.9`, torch `2.15.0`, misaki `0.9.4`, espeakng-loader `0.2.4`; لا يوجد `torchaudio`, `f5_tts`, `habibi_tts`, أو `safetensors`. لم تُثبّت/تُرقّ أي حزمة في هذه الدفعة. هذا يختلف عن حالة التسليم السابقة حيث كان torch غير مثبت.
 - ما لم يُختبر: توليد صوت Habibi أو Lahgtna، جودة/طبيعية الصوت، زمن التوليد، مدة/حجم العينة، وبصمة أوزان Habibi. لا توجد عينة عراقية جديدة؛ عينة Majed السابقة تبقى المرجع النصي، لا دليلاً على Habibi.
-- الخطوة المعلقة الأولى: انتظر من مالك Habibi (`SWivid`) توثيقاً مكتوباً لمصادر وحقوق/موافقات التسجيلات العراقية `58.9h`، ومصدر حقوق كل بيانات MSA الموروثة وحق استعمال مشتقات MGB-2 تجارياً، وسلسلة F5/Emilia والترخيص الذي يحكم checkpoint IRQ، مع تفسير تعارض بيانات Hub وREADME. لا تراسل أي جهة تلقائياً. إلى أن يتوفر ذلك لا تشغّل أمراً لتنزيل أو تثبيت.
-- بعد ورود توثيق كافٍ فقط: أعد فتح [`docs/HABIBI_IRQ_LICENSE_REVIEW.md`](docs/HABIBI_IRQ_LICENSE_REVIEW.md)، أعد فحص الملفات/الأحجام والبيئة، وقرر إن كانت البوابة اجتازت. إن اجتازت، ثبّت المطلوب داخل `lab/voice-env` حصراً، ثم ولّد `TEST_ONLY` بالنص العربي المسجل في `docs/evaluation-texts.md` وسجل الزمن والمدة والحجم والبصمات قبل طلب تقييم الاستماع من المستخدم.
+- فحص Habibi IRQ لهذه المرحلة منتهٍ ومؤرشف؛ لا تراسل الجهات ولا تنزّل Habibi IRQ أو Lahgtna. المتطلبات المكتوبة أعلاه تحفظ سبب الإيقاف فقط، وماكو متابعة نشطة لهذا الفحص.
+- أي إعادة تقييم صوتية لاحقاً تبدأ بالهدف الحالي في [`docs/WHITE_ARABIC_VOICE_CANDIDATES.md`](docs/WHITE_ARABIC_VOICE_CANDIDATES.md)، وتتحقق من الترخيص التجاري ومصادر الصوت/التدريب قبل أي تثبيت أو تنزيل أو توليد.
 - أوامر تحقق الحالة:
 
 ```sh
@@ -60,6 +62,24 @@ git log -5 --oneline
 uv pip list --python lab/voice-env/bin/python
 df -h .
 ```
+
+## استئناف 2026-11-17: التحليل المحلي والحلقة التالية
+
+- هدف الصوت تم تحديثه بتوجيه المستخدم إلى عربي أبيض قريب من الفصحى المبسطة وطبيعي للجمهور العربي الواسع. Habibi IRQ فحص منتهٍ حالياً؛ لا تراسل الجهات ولا تنزّله، ولا تنزّل Lahgtna. لم أجرِ أي تنزيل أو اختبار صوت. مراجعة SILMA/Nabra/Fasih/Habibi ومصادرهم المعلنة في [`docs/WHITE_ARABIC_VOICE_CANDIDATES.md`](docs/WHITE_ARABIC_VOICE_CANDIDATES.md). الخلاصة: لا مرشح اجتاز معاً وضوح المصدر والترخيص التجاري، فجوة الصوت مفتوحة.
+- فحص الخطّة مقابل الموجود ووسائل الربط في [`docs/LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md). الأدوات: `n8n` غير مثبت، `prefect` غير مثبت، `docker` CLI موجود لكن Docker daemon متوقف (socket مفقود). ماكو بيانات أداء حقيقية مصدرة ولا موصلات منصة جاهزة. لم أحاول تنزيل صورة Docker.
+- أضيفت أداة stdlib محلية `tools/analyze_platform_metrics.py`، fixture اصطناعي `lab/fixtures/platform-metrics-TEST_ONLY.csv`، وtemplate فارغ `lab/templates/platform-metrics-template.csv`. النتيجة الاختبارية ignored محلياً تحت `lab/evidence/`.
+- أمر التحليل: `python3 tools/analyze_platform_metrics.py lab/fixtures/platform-metrics-TEST_ONLY.csv --output lab/evidence/performance-decisions-TEST_ONLY-run-03.json`. النتيجة: 26 صفاً اصطناعياً، 4 منصات: YouTube اقتراح hook واحد، Instagram تجربة Carousel، TikTok تكرار متغير واحد، وFacebook استكشافي لأن baseline أقل من خمسة. الحقوق غير متحققة وQA تقني فقط، لذلك `scale_eligible=false`, `export_allowed=false`, `publish_allowed=false`. هذه بيانات fixture وليست أداء حقيقياً.
+- فحص template schema ومنع overwrite: PASS؛ إذا كان ملف JSON موجوداً يرفضه البرنامج ولم تتغير بصمته.
+- اختبار `python3 lab/test_checkpoint.py`: PASS بست حالات الاستئناف السابقة. اختبار `(cd lab/motion-canvas && npm run build)`: PASS لـTypeScript/Vite (847 modules، Vite render 0.923s). FFprobe لكل فيديو على حدة اجتاز: Motion Canvas AR/EN 1080×1920,24fps,71/76 frames,2.958333/3.166667s؛ librsvg AR/EN 1080×1920,24fps,96 frames,4s. ماكو صوت في هذه المخرجات.
+- أمر التحقق الأول للتوقع كتب صفاً زائداً (الملف فيه 26 صف بيانات + header)، وأمر FFprobe الأول مرّر عدة ملفات بطريقة غير مدعومة؛ صححت العدّ وشغلت كل فيديو منفرداً ونجح التحقق النهائي. ماكو تغييرات خارج المشروع أو أسرار أو اتصال خارجي.
+- أول خطوة معلّقة: الحصول محلياً على ملف CSV لقياسات 24 ساعة من منشورات مُصرح بها، مع baseline مماثل كافٍ، أو ترك الأداء معلقاً إذا ماكو وصول. بعد إنشاء `lab/imports/platform-metrics-24h.csv`, شغّل:
+
+```sh
+cd /Users/aliadil/Projects/ContentFactory
+python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv --output lab/evidence/performance-decision-run-01.json
+```
+
+- بعد ذلك راجع جودة المقترح بشرياً، ولا توسّع إلا بإشارة على موضوعين مع QA مقبول وصرف خارجي صفر. الصوت التجاري الطبيعي يبقى مستقلاً ومعلّقاً عند توثيق مصادر التدريب والرخصة.
 
 ## أوامر متابعة الموشن
 

@@ -8,6 +8,8 @@
 - ملفات المختبر مفكوكة داخل `lab/` بعد فحص ZIP وCRC والمسارات.
 - اختبارات الاستئناف المحلية اجتازت ست حالات. عينات الفيديو الأصلية اجتازت FFprobe.
 - الرندر الحديث يحتاج `librsvg` لأن `FFmpeg` المثبت لا يحتوي SVG decoder. `n8n` غير مثبت.
+- الحركة والتنسيقات متوفرة محلياً؛ لا يوجد موصل أداء منصة فعلي أو بيانات حسابات. للتحليل اليدوي بعد التصدير المحلي استخدم `tools/analyze_platform_metrics.py` مع أعمدة `lab/templates/platform-metrics-template.csv`.
+- فجوة الصوت العربي الطبيعي المرخص تجارياً مفتوحة؛ مرشحو MSA لم يجتازوا بعد التحقق من مصدر بيانات التدريب. مافي صوت عربي معتمد للإنتاج.
 
 ## تشغيل المختبر
 
@@ -20,3 +22,5 @@ python3 lab/render_mac.py
 يتطلب `render_mac.py` الأمرين `rsvg-convert` و`ffmpeg`، ويتحقق من خرج الفيديو عبر `ffprobe`. تثبيت `librsvg` عبر Homebrew: `brew install librsvg`.
 
 راجع [HANDOFF.md](HANDOFF.md) لاستئناف الخطوة المعلقة، و[ContentFactory_Implementation_Reference_AR.md](ContentFactory_Implementation_Reference_AR.md) للمواصفة.
+
+مراجعة الخطوة المحلية والتحليل: [LOCAL_WORKFLOW_NEXT_STEP.md](docs/LOCAL_WORKFLOW_NEXT_STEP.md). مراجعة الصوت العربي الأبيض: [WHITE_ARABIC_VOICE_CANDIDATES.md](docs/WHITE_ARABIC_VOICE_CANDIDATES.md).
