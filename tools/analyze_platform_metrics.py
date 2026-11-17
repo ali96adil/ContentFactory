@@ -67,6 +67,11 @@ def compare(rows: list[dict[str, str]]) -> dict[str, object]:
     candidates = [row for row in rows if row["role"] == "candidate"]
     if not candidates:
         raise ValueError("CSV must include at least one candidate row")
+    is_synthetic = any(
+        "synthetic" in row["data_origin"].strip().lower()
+        or "test_only" in row["data_origin"].strip().lower()
+        for row in rows
+    )
 
     decisions = []
     positive_topics: set[str] = set()
@@ -106,7 +111,13 @@ def compare(rows: list[dict[str, str]]) -> dict[str, object]:
             "rights_gate": "PASS" if rights_ok else "BLOCKED_UNVERIFIED_RIGHTS",
             "external_cost_usd": number(candidate, "external_cost_usd"),
         }
-        if len(baseline_metrics) >= 5 and candidate_metrics:
+        if is_synthetic:
+            decision.update(
+                recommendation="test_only_no_action",
+                reason="synthetic TEST_ONLY input is for tool validation only",
+                next_variable="do not use this output for publication, scaling, or production decisions",
+            )
+        elif len(baseline_metrics) >= 5 and candidate_metrics:
             base = {name: median(item[name] for item in baseline_metrics)
                     for name in ("view_rate", "retention", "save_share_rate")}
             decision["candidate_metrics"] = candidate_metrics
@@ -137,11 +148,6 @@ def compare(rows: list[dict[str, str]]) -> dict[str, object]:
             decision["reason"] = "candidate has zero denominator data; keep it exploratory"
         decisions.append(decision)
 
-    is_synthetic = any(
-        "synthetic" in row["data_origin"].strip().lower()
-        or "test_only" in row["data_origin"].strip().lower()
-        for row in rows
-    )
     scale_reasons = []
     if len(positive_topics) < 2:
         scale_reasons.append("positive signal has not repeated across two distinct topics")

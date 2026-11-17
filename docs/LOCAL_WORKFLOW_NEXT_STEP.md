@@ -19,7 +19,7 @@
 
 أقرب جزء يمكن إنجازه بأمان من حلقة «فكرة ← محتوى ← معاينة ← قياس ← الحلقة التالية» هو ذيل الحلقة: بعد توفر CSV يدوي من حساب مصرّح به، يقارن المرشح بآخر 10 منشورات من نفس المنصة والحساب واللغة والصيغة وبعمر قياس ضمن ساعة من عمره. يتطلب القرار الاستدلالي خمسة قياسات مماثلة على الأقل؛ إذا نقصت، النتيجة `exploratory`. لا توجد بيانات فعلية بهذه الجولة، لذلك أنشأت fixture اصطناعية موسومة `TEST_ONLY` فقط.
 
-الأداة تحسب محلياً نسب المشاهدات إلى مرات الظهور، والاحتفاظ (متوسط المشاهدة/مدة المحتوى)، ونسبة الحفظ والمشاركة. تقترح متغيراً واحداً للحلقة التالية: افتتاحية إذا ارتفع view-rate وانخفض retention، Carousel إذا ارتفعت saves/shares على Instagram/Facebook، أو تكرار/استكشاف عند ضعف الإشارة. ما تعطي قرار توسع إلا بإشارات موجبة في موضوعين مختلفين، وموافقة بشرية للجودة، و`rights_status=verified`، وصرف خارجي صفر، وبيانات غير اصطناعية. التصدير والنشر دائماً `false`.
+الأداة تحسب محلياً نسب المشاهدات إلى مرات الظهور، والاحتفاظ (متوسط المشاهدة/مدة المحتوى)، ونسبة الحفظ والمشاركة. تقترح متغيراً واحداً للحلقة التالية: افتتاحية إذا ارتفع view-rate وانخفض retention، Carousel إذا ارتفعت saves/shares على Instagram/Facebook، أو تكرار/استكشاف عند ضعف الإشارة. ملفات `TEST_ONLY` للتأكد من عمل الأداة فقط: إذا ظهر `synthetic` أو `test_only` في `data_origin`، تمنع الأداة كل توصية تشغيلية (`test_only_no_action`) وتبقي `scale_eligible`, `export_allowed`, و`publish_allowed` على `false`. حتى مع بيانات فعلية، لا يصدر قرار توسع إلا بإشارات موجبة في موضوعين مختلفين، وموافقة بشرية للجودة، و`rights_status=verified`، وصرف خارجي صفر؛ التصدير والنشر دائماً `false` من هذه الأداة.
 
 الـCSV المحلي يجب أن يحتوي على أعمدة [`platform-metrics-template.csv`](../lab/templates/platform-metrics-template.csv). استخدم `data_origin=manual_export` للبيانات المنقولة من تصدير محلي؛ عيّن `rights_status=verified` فقط بعد مراجعة الحقوق، و`quality_status=human_approved` فقط بعد الموافقة البشرية المطلوبة. لا تضع كلمات مرور أو Tokens أو روابط OAuth. طبّق anonymization على معرف الحساب إذا مو مطلوب التحليل بهويته.
 
@@ -33,7 +33,8 @@ python3 tools/analyze_platform_metrics.py lab/fixtures/platform-metrics-TEST_ONL
 - بداية العمل كانت الفرع `main` والـHEAD `e9b89ab` بحالة نظيفة.
 - `python3 lab/test_checkpoint.py` — PASS للحالات الست: timeout/retry، إلغاء التكرار المتزامن، رفض الحقوق غير المؤكدة، منع الوجهة العامة، حد المحاولات، واستعادة SQLite.
 - `(cd lab/motion-canvas && npm run build)` — PASS: TypeScript وVite، 847 module، انتهى Vite خلال 0.923 ثانية.
-- `python3 tools/analyze_platform_metrics.py ...` — PASS على 26 صفاً اصطناعياً و4 candidates: YouTube=`hook_experiment`، Instagram=`carousel_experiment`، TikTok=`repeat_one_variable`، Facebook=`exploratory` بسبب أربعة baselines فقط. حقوق fixture `unverified` وQA `technical_only`؛ `scale_eligible=false`, `publish_allowed=false`.
+- تشغيل التحليل السابق قبل إضافة حاجز `TEST_ONLY` أنتج توصيات تجريبية لكل candidate رغم تعطيل التوسع والنشر؛ عولج هذا السلوك في استئناف 2026-11-17 أدناه.
+- تحقق schema الـtemplate ورفض الكتابة فوق ملف JSON موجود سبق نجاحهما كما هو موثق في الاستئناف السابق.
 - تحقق schema الـtemplate ورفض الكتابة فوق ملف JSON موجود — PASS؛ بقيت بصمة الملف الموجود مطابقة بعد الرفض.
 - مراجعة FFprobe للمخرجات السابقة: Motion Canvas AR `1080×1920`, 24 fps, 71 frames, 2.958333s؛ EN 76 frames, 3.166667s. librsvg AR/EN `1080×1920`, 24 fps, 96 frames, 4s. كل المخرجات الموجودة بلا صوت بحسب مسار الرندر.
 - أثناء التحقق الأول أخطأت كتابة التوقع بعدد الصفوف (26 بيانات + header) وأعطيت FFprobe أكثر من ملف بصيغة أمر غير صحيحة. صححت assertions وشغّلت FFprobe لكل ملف منفرداً؛ التحقق النهائي أعلاه ناجح.
@@ -53,3 +54,12 @@ python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv -
 ```
 
 إذا ما توفر تصدير أو صلاحية قراءة، لا تستخدم synthetic fixture كدليل سوق؛ يبقى الجزء التالي يدوياً ومعلقاً. ربط n8n يبقى مؤجلاً إلى أن تُراجع advisories وتُختبر عقد محلية آمنة؛ التشغيل الحالي يقتصر على localhost، ولا نحتاج Docker بهذه النسخة لكن سجل التشغيل يحذر من إلغاء npm-host mode مستقبلاً. لا تجرّب Docker عبر تنزيل image.
+
+
+## استئناف 2026-11-17: حصر بيانات TEST_ONLY بالتجارب
+
+- بقي n8n متوقفاً، ولم أستخدم انتظار بيانات أداء أو صوت. راجعت `main` عند `95cd1aa` وكانت شجرة Git نظيفة. استخدمت محلل المقاييس الموجود؛ لم أبنِ أداة جديدة.
+- وجدت أن المحلل كان يمنع `scale_eligible` والتصدير والنشر للـfixture الاصطناعية، لكنه ما زال يعطي candidate توصيات مثل `hook_experiment`. شدّدت الحاجز في `tools/analyze_platform_metrics.py`: أي `data_origin` يتضمن `synthetic` أو `test_only` ينتج `recommendation=test_only_no_action` وتعليمة صريحة بعدم استخدام النتائج للنشر أو التوسع أو قرارات الإنتاج. بقيت مقاييس المنصة وحقوق/QA ظاهرة للمراجعة، لكن لا توجد توصية تحريرية عملية.
+- تحقق التشغيل على `lab/fixtures/platform-metrics-TEST_ONLY.csv` مرّ: 26 صفاً، 4 candidates، وضع `TEST_ONLY_SYNTHETIC`، كل التوصيات `test_only_no_action`، و`scale_eligible=false`, `export_allowed=false`, `publish_allowed=false`. الأمر لا يكتب ملف نتيجة: `python3 tools/analyze_platform_metrics.py lab/fixtures/platform-metrics-TEST_ONLY.csv`.
+- الملفات المتغيرة في هذه الدفعة: `tools/analyze_platform_metrics.py`, `docs/LOCAL_WORKFLOW_NEXT_STEP.md`, و`HANDOFF.md`. لم يتغير n8n أو بيانات التجربة، ولا اتصال شبكة/حسابات أو نشر.
+- الخطوة التالية: عند توفر تصدير أداء محلي مصرح به فقط، جهّز نسخة من `lab/templates/platform-metrics-template.csv` تحت `lab/imports/platform-metrics-24h.csv` وعلّم المصدر `manual_export` بعد إزالة/تعمية معرفات الحساب غير اللازمة، ثم شغّل: `python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv --output lab/evidence/performance-decision-run-01.json`. إذا بقي التصدير غير متوفر، لا تستخدم fixture لاتخاذ قرار.
