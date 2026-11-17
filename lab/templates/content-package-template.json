@@ -1,0 +1,202 @@
+{
+  "contract_version": "content-package.v1",
+  "package_id": "",
+  "revision": "",
+  "lifecycle": {
+    "status": "draft",
+    "test_only": true,
+    "created_at_utc": ""
+  },
+  "topic": {
+    "topic_id": "",
+    "working_title": {
+      "ar_white": "",
+      "en": ""
+    },
+    "audience": "",
+    "viewer_need": "",
+    "single_promise": {
+      "ar_white": "",
+      "en": ""
+    },
+    "excluded_claims": []
+  },
+  "fact_base": {
+    "claims": [],
+    "review": {
+      "status": "blocked",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    }
+  },
+  "sources": [],
+  "copy": {
+    "ar_white": {
+      "short_video": {
+        "hook": "",
+        "voiceover": "",
+        "on_screen_text": [],
+        "caption": "",
+        "call_to_action": "",
+        "target_duration_seconds": null,
+        "visual_beats": []
+      },
+      "carousel": {
+        "caption": "",
+        "slides": [],
+        "call_to_action": "",
+        "target_aspect_ratio": ""
+      },
+      "youtube_long": {
+        "title": "",
+        "opening": "",
+        "sections": [],
+        "ending": "",
+        "description": "",
+        "target_duration_minutes": null,
+        "chapters": []
+      }
+    },
+    "en": {
+      "short_video": {
+        "hook": "",
+        "voiceover": "",
+        "on_screen_text": [],
+        "caption": "",
+        "call_to_action": "",
+        "target_duration_seconds": null,
+        "visual_beats": []
+      },
+      "carousel": {
+        "caption": "",
+        "slides": [],
+        "call_to_action": "",
+        "target_aspect_ratio": ""
+      },
+      "youtube_long": {
+        "title": "",
+        "opening": "",
+        "sections": [],
+        "ending": "",
+        "description": "",
+        "target_duration_minutes": null,
+        "chapters": []
+      }
+    }
+  },
+  "assets": [],
+  "platform_adaptations": {
+    "youtube": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "tiktok": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "instagram": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "facebook": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    }
+  },
+  "review_gates": {
+    "facts": {
+      "status": "blocked",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "evidence_ids": []
+    },
+    "rights": {
+      "status": "blocked",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "asset_ids_cleared": [],
+      "notes": ""
+    },
+    "arabic_white_language": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "english_language": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "bilingual_parity": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "quality": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "checklist": []
+    },
+    "audio": {
+      "status": "blocked_unverified_arabic_voice",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "asset_id": ""
+    },
+    "technical_render": {
+      "status": "pending",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "artifact_ids": []
+    }
+  },
+  "release_control": {
+    "local_preview_allowed": true,
+    "approval_status": "blocked",
+    "approved_revision": "",
+    "external_publication_enabled": false,
+    "external_publication_approved": false,
+    "destination_alias": "",
+    "approved_by": "",
+    "approved_at_utc": ""
+  },
+  "provenance": {
+    "created_by_alias": "",
+    "source_snapshot_sha256": "",
+    "package_sha256": "",
+    "notes": ""
+  }
+}

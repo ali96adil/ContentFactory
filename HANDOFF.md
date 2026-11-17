@@ -148,3 +148,37 @@ N8N_LISTEN_ADDRESS=127.0.0.1 N8N_HOST=127.0.0.1 N8N_PORT=5678 N8N_PROTOCOL=http 
 - النتيجة PASS: `mode=TEST_ONLY_SYNTHETIC`، 28 صفاً، 4 candidates، وكل التوصيات `test_only_no_action`؛ `scale_eligible=false`, `export_allowed=false`, `publish_allowed=false`. تحققنا برمجياً من القيم بعد إنشاء النتيجة.
 - ملفات الإدخال والنتيجة تحت `lab/evidence/` مستثناة بـ`.gitignore`؛ القالب الحقيقي مستثنى عبر `.git/info/exclude`. لن تدخل بيانات الاختبار أو الإدخال الحقيقي في Git. ماكو أسرار أو حسابات أو اتصال خارجي.
 - الخطوة التالية: اختبار آخر إن رغبت، أو ابدأ تعبئة القالب الحقيقي يدوياً من بيانات مصرح بها. لا تستخدم fixture كأداء فعلي ولا تتخذ منها قرار نشر/توسع.
+
+## استئناف 2026-11-17: عقد حزمة محتوى AR/EN متعدد التنسيقات
+
+- بدأت من `main` عند `ccbd962`، Git كان نظيفاً. راجعت مرجع التنفيذ وملفات `lab/motion.mjs`, `lab/render_mac.py`, `tools/record_media_evaluation.py`, وسجل حالات `lab/checkpoint.py`. الموجود يوفر رندر ثابت وتسجيل ميتاداتا للوسائط، لكنه لا يقرأ عقد محتوى موحداً؛ لذلك أنشأت قالب JSON ودليل عقد ومثالاً محلياً بدلاً من تعديل renderer أو بناء نظام كبير.
+- أضيف `lab/templates/content-package-template.json`: يجمع fact base ومصادره، AR-white وEN، short video وCarousel وYouTube long، سجل assets وترخيصها وبصمتها، overrides منفصلة للمنصات الأربع، ومراجعات fact/rights/quality/language/audio/technical. الحساب والوجهة فارغان؛ المعاينة المحلية مسموحة والنشر الخارجي false ومقفول افتراضياً.
+- أضيف `lab/evidence/content-package-demo-TEST_ONLY.json`: مثال مسودة ثنائي اللغة أصلي عن ملاحظة مشهد كوب، بلا أصول أو ادعاءات واقعية أو مواد مقتبسة، موسوم TEST_ONLY. بوابات الحقائق والحقوق والجودة والصوت غير معتمدة والنشر blocked. لم يُنشأ فيديو؛ الرندر الموجود ثابت ولا يقرأ الحزمة.
+- أضيف `docs/CONTENT_PACKAGE_CONTRACT.md` لشرح بنية السجل والحقول وبوابات المرور/الإيقاف وكيفية حفظ provenance والترخيص.
+- أمر التحقق الهيكلي الناجح بـPython stdlib (لا يشغّل renderer أو محلل أداء):
+
+```sh
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+t = json.loads(Path("lab/templates/content-package-template.json").read_text())
+s = json.loads(Path("lab/evidence/content-package-demo-TEST_ONLY.json").read_text())
+formats = {"short_video", "carousel", "youtube_long"}
+platforms = {"youtube", "tiktok", "instagram", "facebook"}
+assert set(t["copy"]["ar_white"]) == set(t["copy"]["en"]) == formats
+assert set(t["platform_adaptations"]) == set(s["platform_adaptations"]) == platforms
+assert s["lifecycle"]["test_only"] is True
+assert all(t["release_control"][k] is False for k in ("external_publication_enabled", "external_publication_approved"))
+assert all(s["release_control"][k] is False for k in ("external_publication_enabled", "external_publication_approved"))
+assert all(g["status"] != "approved" for g in s["review_gates"].values())
+assert s["sources"] == s["assets"] == s["fact_base"]["claims"] == []
+assert all(not a["account_alias"] and not a["publishing_enabled"] for a in s["platform_adaptations"].values())
+print("PASS")
+PY
+```
+
+- نتيجة التحقق: PASS: لغتان، ثلاثة تنسيقات، أربعة adapters، والنشر غير مفعّل ولا معتمد؛ العينة بلا حسابات أو مصادر أو أصول أو ادعاءات.
+
+- الملفات المضافة/المعدلة: `lab/templates/content-package-template.json`, `lab/evidence/content-package-demo-TEST_ONLY.json` (ignored محلياً), `docs/CONTENT_PACKAGE_CONTRACT.md`, `README.md`, و`HANDOFF.md`. هذه دفعة عقد وتوثيق؛ لا كود تشغيل جديد.
+- الخطوة التالية: بناء adapter محلي صغير يقرأ حزمة JSON **بعد اعتمادها** ويغذي `lab/motion.mjs` أو مشهد Motion Canvas الحالي؛ قبل ذلك حدد أي renderer تريد وصمم ربطاً لا يفتح بوابة نشر. لا تُنشئ حسابات ولا تشغّل n8n.

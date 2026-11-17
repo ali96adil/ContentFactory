@@ -23,4 +23,4 @@ python3 lab/render_mac.py
 
 راجع [HANDOFF.md](HANDOFF.md) لاستئناف الخطوة المعلقة، و[ContentFactory_Implementation_Reference_AR.md](ContentFactory_Implementation_Reference_AR.md) للمواصفة.
 
-مراجعة الخطوة المحلية والتحليل: [LOCAL_WORKFLOW_NEXT_STEP.md](docs/LOCAL_WORKFLOW_NEXT_STEP.md). مراجعة الصوت العربي الأبيض: [WHITE_ARABIC_VOICE_CANDIDATES.md](docs/WHITE_ARABIC_VOICE_CANDIDATES.md).
+مراجعة الخطوة المحلية والتحليل: [LOCAL_WORKFLOW_NEXT_STEP.md](docs/LOCAL_WORKFLOW_NEXT_STEP.md). مراجعة الصوت العربي الأبيض: [WHITE_ARABIC_VOICE_CANDIDATES.md](docs/WHITE_ARABIC_VOICE_CANDIDATES.md). قالب حزمة المحتوى الموحدة AR/EN وبوابات المراجعة: [CONTENT_PACKAGE_CONTRACT.md](docs/CONTENT_PACKAGE_CONTRACT.md) والقالب المحلي [content-package-template.json](lab/templates/content-package-template.json).
