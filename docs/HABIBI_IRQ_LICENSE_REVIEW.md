@@ -52,7 +52,7 @@
 ## أوامر الفحص المنفذة
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 git status --short --branch
 git log -5 --oneline
 uname -m

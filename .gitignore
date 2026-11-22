@@ -2,17 +2,29 @@
 .env
 .env.*
 !.env.example
+.npmrc
+.pypirc
 *.pem
 *.key
 *.p12
 *.pfx
+*.p7b
+*.p7c
+*.jks
+*.keystore
 secrets/
 credentials.json
 n8n-data/
+*.sqlite
+*.sqlite3
+*.db
+*.db-*
+*.log
 
 # Downloaded lab archive and bundled evidence/media are kept locally, outside Git.
 ContentFactory_Lab_2026-11-16.zip
 lab/evidence/
+lab/imports/
 lab/repository/
 lab/ContentFactory-Lab.bundle
 lab/renders/

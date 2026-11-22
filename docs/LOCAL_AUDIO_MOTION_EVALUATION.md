@@ -2,7 +2,7 @@
 
 تاريخ الفحص: 2026-11-17، `Asia/Baghdad`
 
-المجلد: `/Users/aliadil/Projects/ContentFactory`
+المجلد: `جذر المستودع`
 
 الحالة: كل الناتج موسوم `TEST_ONLY`؛ لا اعتماد إنتاجياً ولا نشر.
 
@@ -79,14 +79,14 @@
 توليد عينة Piper الإنكليزية (البيئة والنموذج موجودان محلياً):
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 printf '%s' 'In a small experiment, a camera watches a coffee pot and takes a picture every few seconds. The team then arranges the images to show how the light changes over time.' | lab/voice-env/bin/piper -m lab/models/en_US-ljspeech-medium.onnx -f lab/evidence/en-piper-ljspeech-TEST_ONLY.wav
 ```
 
 إعادة توليد عينة macOS العربية وإنشاء WAV بترميز المشروع:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 say -v Majed -o lab/evidence/ar-macos-majed-TEST_ONLY.aiff 'في تجربة صغيرة، تراقب كاميرا إبريق القهوة وتلتقط صورة كل بضع ثوانٍ. بعد ذلك، يرتّب الفريق الصور ليُظهر كيف يتغيّر الضوء مع الوقت.'
 ffmpeg -y -i lab/evidence/ar-macos-majed-TEST_ONLY.aiff -ac 1 -ar 22050 -sample_fmt s16 lab/evidence/ar-macos-majed-TEST_ONLY.wav
 ```
@@ -94,7 +94,7 @@ ffmpeg -y -i lab/evidence/ar-macos-majed-TEST_ONLY.aiff -ac 1 -ar 22050 -sample_
 إعادة إنشاء بيئة Motion Canvas المحلية وتشغيل المحرر:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory/lab/motion-canvas
+cd $(git rev-parse --show-toplevel)/lab/motion-canvas
 npm install
 npm run start -- --host 127.0.0.1 --port 9000 --strictPort
 ```
@@ -102,7 +102,7 @@ npm run start -- --host 127.0.0.1 --port 9000 --strictPort
 من المحرر اضبط `resolution` إلى `1080×1920` و`Rendering frame rate` إلى `24`، ثم اضغط `RENDER` ليخرج PNG إلى `output/project/`. لتشفير تسلسل كامل (من `000000.png`):
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 ffmpeg -y -framerate 24 -i 'lab/motion-canvas/output/project/%06d.png' -c:v libx264 -crf 22 -pix_fmt yuv420p lab/evidence/motion-canvas-bilingual-TEST_ONLY.mp4
 ```
 

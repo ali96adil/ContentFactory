@@ -9,7 +9,7 @@
 الأمر الذي أعاد التقرير التفصيلي:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 npm --prefix lab/n8n-local audit --cache "$PWD/lab/n8n-local/.npm-cache" --omit=dev --json > lab/n8n-local/.npm-cache/audit-2.47.7.json
 ```
 
@@ -80,7 +80,7 @@ npm --prefix lab/n8n-local audit --cache "$PWD/lab/n8n-local/.npm-cache" --omit=
 ## أوامر تحقق محلي لا تشغّل n8n
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 git status --short --branch
 node lab/n8n-local/node_modules/n8n/bin/n8n --version
 npm --prefix lab/n8n-local audit --cache "$PWD/lab/n8n-local/.npm-cache" --omit=dev --json

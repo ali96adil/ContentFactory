@@ -2,30 +2,30 @@
 
 # مصنع المحتوى الذكي
 
-مختبر محلي لحزم محتوى معرفي أصلية بالعربية البيضاء والإنكليزية. الميزانية الخارجية صفر، النشر الخارجي معطّل، وStageCore وKids Studio خارج النطاق. الفيديوهات والتقارير البصرية تحت `lab/evidence/` تجريبية محلية وليست معتمدة للإنتاج.
+مختبر محلي لحزم محتوى معرفي أصلية بالعربية البيضاء والإنكليزية. الميزانية الخارجية صفر، والنشر الخارجي معطّل، وStageCore وKids Studio خارج النطاق. فيديوهات وتجارب `TEST_ONLY` لا تعني اعتماد الجودة أو الحقوق أو التصدير.
 
 ## الحالة والقيود
 
-- العقد والقالب: `docs/CONTENT_PACKAGE_CONTRACT.md` و`lab/templates/content-package-template.json`.
+- عقد المحتوى: `docs/CONTENT_PACKAGE_CONTRACT.md`؛ القالب: `lab/templates/content-package-template.json`.
 - الصوت العربي الطبيعي المرخص تجارياً فجوة مفتوحة؛ لا يوجد صوت عربي معتمد للإنتاج.
-- n8n `2.47.7` مثبت كحزمة محلية لكن الخدمة متوقفة بسبب مراجعة الثغرات؛ لا تشغّله قبل مراجعة `docs/N8N_AUDIT_REVIEW.md`.
-- لا توجد موصلات أداء منصة فعلية. بيانات المنصات في `lab/fixtures/` اصطناعية للاختبار فقط؛ صادرات المستخدم الحقيقية تحفظ محلياً تحت `lab/imports/` ولا تدخل Git.
-- بوابات الحقائق والحقوق والجودة والتصدير والنشر تبقى مغلقة إلى أن تُراجع منفصلة. إنشاء MP4 أو نجاح الاختبارات التقنية لا يعني اعتماد الحركة أو جودة المحتوى.
+- n8n `2.47.7` مثبت محلياً والخدمة متوقفة بسبب مراجعة الثغرات. لا تشغّله قبل مراجعة `docs/N8N_AUDIT_REVIEW.md`.
+- لا توجد موصلات أداء منصة فعلية. `lab/fixtures/` للاختبارات الاصطناعية فقط؛ صادرات الأداء الحقيقية تبقى محلية في `lab/imports/`.
+- بوابات الحقائق والحقوق والجودة والتصدير والنشر مغلقة. فحوص الترميز لا تمنح موافقة بشرية.
 
-## التطوير على جهاز جديد
+## التطوير من جهاز جديد
 
-المسار مدعوم على macOS وLinux. Windows يحتاج WSL2 أو بيئة POSIX مشابهة؛ Windows الأصلي غير مختبر. لا يحتاج مسار Python حزم pip خارج المكتبة القياسية.
+المسار مدعوم على macOS وLinux. على Windows استخدم WSL2 أو بيئة POSIX مشابهة؛ Windows الأصلي غير مختبر. أدوات Python تستخدم المكتبة القياسية فقط، ولا تحتاج حزم `pip`.
 
-| الأداة | النسخة المرجعية/المتطلب | الاستخدام |
+| الأداة | النسخة المرجعية أو المتطلب | الاستخدام |
 |---|---|---|
-| Git | أي نسخة حديثة تدعم bundle وmerge | المصدر والإصدارات |
+| Git | حديثة، تدعم bundle وmerge | المصدر والإصدارات |
 | Python | `3.12+` | الرندر، QA والاختبارات |
-| Node.js | `24.21.0` من `.nvmrc` | Motion Canvas فقط |
-| npm | `11.x` | تثبيت Motion Canvas عبر lockfile |
-| FFmpeg وFFprobe | `7.1.1` مرجعي؛ يلزم H.264/libx264 | ترميز وفحص الفيديو |
-| `rsvg-convert` | `librsvg 2.63.4` مرجعي | تحويل SVG إلى صور |
+| Node.js | `24.21.0` حسب `.nvmrc` | Motion Canvas الاختياري |
+| npm | `11.x` | اعتماديات Motion Canvas المثبتة بالـlockfile |
+| FFmpeg وFFprobe | `7.1.1` مرجعي؛ مطلوب encoder `libx264` | ترميز الفيديو والتحقق |
+| `rsvg-convert` | `librsvg 2.63.4` مرجعي | تحويل SVG |
 
-هذه النسخ سُجلت من جهاز التطوير الحالي (macOS/arm64)؛ ما عدا اختبارات المشروع على POSIX، لم تُختبر بعد على كل توزيعة Linux أو Windows/WSL. على Debian/Ubuntu أسماء الحزم المعتادة هي `python3`, `python3-venv`, `nodejs`, `npm`, `ffmpeg`, و`librsvg2-bin`. ثبّت أدوات النظام من مدير الحزم المعتمد عندك، وتأكد أن `ffmpeg -encoders` يعرض `libx264` وأن الأوامر `python3`, `node`, `npm`, `ffmpeg`, `ffprobe`, و`rsvg-convert` موجودة في `PATH`.
+هذه نسخ مسجلة من جهاز التطوير الحالي macOS/arm64. وثائق POSIX مناسبة لـLinux/WSL، لكن ما صار اختبار على كل توزيعة. على Debian/Ubuntu أسماء الحزم المعتادة: `python3`, `python3-venv`, `nodejs`, `npm`, `ffmpeg`, `librsvg2-bin`. ثبّت الأدوات من مدير الحزم المعتمد عندك، وتأكد أن `ffmpeg -encoders` يعرض `libx264` وأن الأوامر التالية متاحة في `PATH`:
 
 ```sh
 git clone https://github.com/ali96adil/ContentFactory.git
@@ -39,11 +39,11 @@ ffprobe -version
 rsvg-convert --version
 ```
 
-لا حاجة إلى `.env` لتشغيل الرندر والاختبارات المحلية؛ لا تحفظ مفاتيح أو بيانات دخول في الملفات. لا تثبّت n8n أو تربط حسابات أثناء إعداد بيئة الاختبار.
+لا يحتاج الرندر المحلي ملف `.env` أو حساب منصة. لا تحفظ مفاتيح أو كلمات مرور في الملفات. لا تثبّت أو تشغّل n8n لإجراء الاختبارات الحالية.
 
-## تشغيل واختبار المسار المحلي
+## الفحوص الأساسية
 
-ابدأ باختبارات الاستئناف والمحوّل من جذر المستودع:
+شغّل من جذر المستودع:
 
 ```sh
 python3 lab/test_checkpoint.py
@@ -52,7 +52,7 @@ python3 -m py_compile tools/render_content_package.py tools/review_content_packa
 node --check lab/motion.mjs
 ```
 
-لتثبيت Motion Canvas (اختياري للمحرر فقط)، استخدم Node المحدد في `.nvmrc` ثم lockfile:
+Motion Canvas اختياري. لاستخدام المحرر، من جذر المستودع اختر Node عبر `nvm use` ثم:
 
 ```sh
 cd lab/motion-canvas
@@ -61,11 +61,11 @@ npm run build
 npm run start -- --host 127.0.0.1 --port 9000
 ```
 
-استخدم `Ctrl+C` للإيقاف. تشغيل Motion Canvas لا يرفع المحتوى ولا يتصل بحسابات المنصات.
+أوقفه بـ`Ctrl+C`. تثبيت `npm ci` يخص Motion Canvas فقط؛ الرندر القياسي لا يحتاج حزم npm.
 
 ## رندر حزمة TEST_ONLY
 
-ملف المثال الاصطناعي في `lab/fixtures/content-package-demo-TEST_ONLY.json` لا يحتوي أصولاً خارجية أو قياسات أداء حقيقية. كل رندر يجب أن يذهب إلى اسم جديد داخل `lab/evidence/`؛ الأداة ترفض الكتابة فوق مخرج سابق.
+`lab/fixtures/content-package-demo-TEST_ONLY.json` نص اصطناعي صغير بلا أصول خارجية أو قياسات أداء. استخدم اسم مجلد جديد لكل تشغيل؛ المحوّل يرفض استبدال المخرجات السابقة.
 
 ```sh
 python3 tools/render_content_package.py \
@@ -79,20 +79,18 @@ python3 tools/test_content_package_recovery.py \
   --run-name content-package-recovery-v3-TEST_ONLY
 ```
 
-الناتج معاينة Short صامتة وشرائح Carousel ومخطط Storyboard؛ لا ينتج حلقة YouTube نهائية. جميعها موسومة `TEST_ONLY`، ومجلد `lab/evidence/` مستثنى من Git.
+ينتج المسار Short صامتاً وشرائح Carousel ومخطط Storyboard؛ لا ينتج حلقة YouTube نهائية. للاستئناف بعد انقطاع، راجع مجلد `.work` ثم أعد أمر الرندر نفسه مع `--resume` دون تغيير الإدخال. المخرجات موسومة `TEST_ONLY`.
 
 ## البيانات والأدلة
 
-- `lab/templates/`: قوالب الإدخال الفارغة.
-- `lab/fixtures/`: بيانات اصطناعية صغيرة قابلة للمشاركة لإعادة الاختبارات؛ لا تستخدمها كأداء سوقي.
-- `lab/imports/`: صادرات أداء محلية مصرح بها، مستثناة من Git. أبقِ الحقول أو المقاييس غير المتاحة فارغة ولا تخمّنها.
-- `lab/evidence/`: الفيديوهات والصور وتقارير الرندر وبيانات التشغيل المحلية؛ مستثناة من Git كي لا تُرفع معاينات أو قواعد بيانات أو مخرجات كبيرة.
-- `HANDOFF.md`: سجل آخر حالة فعلية والخطوة التالية. انظر أيضاً `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
-
-أوامر التحليل اليدوي لا تُشغّل إلا على CSV أُخذ من تصدير مصرح به. لا تدخل حسابات أو رموز API.
+- `lab/templates/`: قوالب الإدخال.
+- `lab/fixtures/`: أمثلة اختبار اصطناعية صغيرة، لا تستخدمها كقياس سوقي.
+- `lab/imports/`: ملفات أداء محلية مصرح بها، مستثناة من Git؛ اترك المقاييس غير المتوفرة فارغة ولا تخمّنها.
+- `lab/evidence/`: الفيديوهات والصور والتقارير وبيانات التشغيل المحلية؛ مستثناة من Git لأنها قد تكون كبيرة أو شخصية.
+- `HANDOFF.md`: سجل البيئة والنتائج والخطوة التالية. راجع أيضاً `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
 
 ## الحركة والمراجعة
 
-`Spotlight v3` مرفوض حسب مراجعة المستخدم. اتجاهات `fieldnotes` و`typeplay` و`gallery` تجارب محفوظة محلياً تحت `lab/evidence/`، وتفاصيلها في `docs/MOTION_CONTENT_SELECTION_TEST_ONLY.md`. آخر مراجعة لطبقات الحركة والانتقالات موثقة في `docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md`، مع معاينات v9 المحلية في `lab/evidence/motion-content-selection-TEST_ONLY/`. قياسات الإطار لا تستبدل الاستماع أو المشاهدة البشرية المتصلة؛ جميع تقييمات الحركة والجودة بانتظار المستخدم.
+`Spotlight v3` مرفوض. اتجاهات `fieldnotes` و`typeplay` و`gallery` محفوظة كاختبارات محلية؛ تفاصيل اختيار الحركة في `docs/MOTION_CONTENT_SELECTION_TEST_ONLY.md`. تقرير حدود المشهد والانتقالات في `docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md`. المعاينات في `lab/evidence/motion-content-selection-TEST_ONLY/` محلية ومستثناة من Git؛ تقييم السلاسة والذوق وقراءة الهاتف ما زال بانتظار مراجعة المستخدم.
 
-للتفاصيل التشغيلية والقيود راجع [HANDOFF.md](HANDOFF.md) و[مرجع التنفيذ](ContentFactory_Implementation_Reference_AR.md). لا توجد موافقة جودة أو حقوق أو تصدير أو نشر مسجلة.
+للتفاصيل راجع [HANDOFF.md](HANDOFF.md)، و[مرجع التنفيذ](ContentFactory_Implementation_Reference_AR.md)، و[عقد الحزمة](docs/CONTENT_PACKAGE_CONTRACT.md). لا توجد موافقة جودة أو حقوق أو تصدير أو نشر مسجلة.

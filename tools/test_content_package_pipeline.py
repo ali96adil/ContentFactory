@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "lab" / "evidence"
-PACKAGE = EVIDENCE / "content-package-demo-TEST_ONLY.json"
+PACKAGE = ROOT / "lab" / "fixtures" / "content-package-demo-TEST_ONLY.json"
 CONVERTER = ROOT / "tools" / "render_content_package.py"
 
 
@@ -27,6 +27,7 @@ def sha256(path: Path) -> str:
 def main() -> None:
     if not PACKAGE.is_file():
         raise SystemExit(f"missing acceptance input: {PACKAGE}")
+    EVIDENCE.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="content-package-acceptance-TEST_ONLY-", dir=EVIDENCE) as temp_name:
         temp = Path(temp_name)
         missing_output = temp / "missing-file-TEST_ONLY"
@@ -47,6 +48,7 @@ def main() -> None:
         output = temp / "resumable-run-TEST_ONLY"
         interrupted = run("--input", str(PACKAGE), "--output", str(output),
                           "--platform", "all", "--preview-seconds", "1",
+                          "--visual-direction", "fieldnotes",
                           "--test-interrupt-after-svg-count", "1")
         work = output.with_name(f".{output.name}.work")
         assert interrupted.returncode == 75
@@ -55,8 +57,14 @@ def main() -> None:
         assert state["stage"] == "vector_rendering"
         assert len(list((work / "svg").rglob("*.svg"))) == 1
 
+        wrong_direction_resume = run("--input", str(PACKAGE), "--output", str(output),
+                                     "--platform", "all", "--preview-seconds", "1",
+                                     "--visual-direction", "gallery", "--resume")
+        assert wrong_direction_resume.returncode != 0 and "resume refused" in wrong_direction_resume.stderr
+        assert work.is_dir()
+
         resumed = run("--input", str(PACKAGE), "--output", str(output), "--platform", "all",
-                      "--preview-seconds", "1", "--resume")
+                      "--preview-seconds", "1", "--visual-direction", "fieldnotes", "--resume")
         assert resumed.returncode == 0, resumed.stderr[-4000:]
         assert output.is_dir() and not work.exists()
         artifacts = output / "artifacts"
@@ -65,17 +73,18 @@ def main() -> None:
         storyboards = sorted(artifacts.glob("youtube-long-storyboard-*-TEST_ONLY.md"))
         assert len(videos) == 2 and len(carousels) == 10 and len(storyboards) == 2
         report = json.loads((artifacts / "render-report.json").read_text(encoding="utf-8"))
+        assert report["visual_direction"] == "fieldnotes"
         assert report["external_publication_enabled"] is False and report["external_publication_approved"] is False
         assert report["audio_present"] is False
         assert all(item["audio_present"] is False for item in report["artifacts"] if item["kind"] == "short_video")
 
         report_hash = sha256(artifacts / "render-report.json")
         overwrite = run("--input", str(PACKAGE), "--output", str(output), "--platform", "all",
-                        "--preview-seconds", "1")
+                        "--preview-seconds", "1", "--visual-direction", "fieldnotes")
         assert overwrite.returncode != 0 and "refusing to overwrite" in overwrite.stderr
         assert sha256(artifacts / "render-report.json") == report_hash
 
-    print("PASS: missing package rejected; incomplete package rejected before output; interrupted SVG generation resumed; 2 silent Shorts + 10 carousel slides + 2 storyboards rendered; overwrite refused without changing existing report")
+    print("PASS: missing package rejected; incomplete package rejected; interrupted fieldnotes render resumed; changed direction rejected on resume; silent TEST_ONLY outputs rendered; overwrite refused without changing report")
 
 
 if __name__ == "__main__":

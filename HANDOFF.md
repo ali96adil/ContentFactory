@@ -4,7 +4,7 @@
 
 ## الحالة المحفوظة
 
-- المجلد: `/Users/aliadil/Projects/ContentFactory`، الفرع `main`؛ نقطة البداية كانت commit `fd44f67`، والدفعات السابقة محفوظة حتى commit `654475b`.
+- المجلد: `جذر المستودع`، الفرع `main`؛ نقطة البداية كانت commit `fd44f67`، والدفعات السابقة محفوظة حتى commit `654475b`.
 - لا تغييرات خارج مجلد المشروع. لا لمس لـStageCore أو Kids Studio، ولا نشر أو رفع محتوى. ماكو أسرار مضافة.
 - البيئة: macOS 27.0 / Apple Silicon M3 Max / ذاكرة 48 GB، مساحة حرة تقارب 199 GiB وقت الفحص. الأدوات الأساسية: Git 2.55.0، Node 24.21.0، Python 3.15.2، FFmpeg/FFprobe 7.1.1، librsvg/rsvg-convert 2.63.4. Python 3.12.9 موجود واستخدمته محلياً لصوت Piper. الحالة الحالية لـ`n8n@2.47.7` هي تثبيت محلي تحت `lab/n8n-local` لكن الخدمة متوقفة بسبب نتائج `npm audit`؛ التفاصيل والأوامر بأسفل الملف. `espeak-ng` غير مثبت.
 - المراجع والحزمة الأصلية تبقى تحت `lab/`. معاينتا librsvg السابقتان صالحتان تقنياً: `1080×1920`، `24fps`، `4s`، بلا صوت.
@@ -36,7 +36,7 @@
 سبق أن جُرّب الأمر التالي داخل بيئة المشروع، لكنه لم يتقدم لأكثر من دقيقتين وأُوقف قبل تثبيت أي حزمة؛ لا تعاوده قبل إزالة عائق الترخيص وفحص سلوك التنزيل:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 uv pip install --python lab/voice-env/bin/python torch==2.15.0 misaki==0.9.4 espeakng-loader==0.2.4
 ```
 
@@ -44,7 +44,7 @@ uv pip install --python lab/voice-env/bin/python torch==2.15.0 misaki==0.9.4 esp
 
 ## استئناف 2026-11-17: مراجعة Habibi-TTS ومرشح بديل
 
-- بدأ الفحص على `main` وبحالة نظيفة عند `9b22104`; المستودع هو `/Users/aliadil/Projects/ContentFactory`. بقيت الملفات السابقة دون تعديل قبل هذه الدفعة.
+- بدأ الفحص على `main` وبحالة نظيفة عند `9b22104`; المستودع هو `جذر المستودع`. بقيت الملفات السابقة دون تعديل قبل هذه الدفعة.
 - قُرئت الورقة وبطاقات/مصادر Habibi الرسمية وفُحصت بيانات D1 المؤدية إلى `Specialized/IRQ`. تقرير المراجعة التفصيلي والجدول وروابط الترخيص: [`docs/HABIBI_IRQ_LICENSE_REVIEW.md`](docs/HABIBI_IRQ_LICENSE_REVIEW.md).
 - قرار البوابة: لا تنزيل ولا تشغيل لـHabibi IRQ. الورقة تثبت استخدام `MGB-2` غير التجاري في مرحلة MSA، وتهيئة F5-TTS على Emilia ذات ترخيص `CC-BY-NC-4.0`، وتذكر `58.9h` من بيانات عراقية in-house بلا مصادر أو تراخيص/موافقات معلنة. يوجد أيضاً تعارض بين metadata العامة في Hub (`CC-BY-NC-SA-4.0`) وREADME الذي يعلن Apache-2.0 للنموذج المتخصص. Apache-2.0 للوزن وحده لا يحل ذلك.
 - فُحص Lahgtna Chatterbox v1 كمرشح بديل ولم يُنزّل: يعلن MIT لكن لا يوثق بيانات التدريب أو مصدر التسجيل، وبطاقة النموذج لا تثبت استكمال العراقية (العراق ضمن roadmap غير المكتمل بينما README يذكر `iq`). بقي محجوباً للسبب نفسه.
@@ -56,7 +56,7 @@ uv pip install --python lab/voice-env/bin/python torch==2.15.0 misaki==0.9.4 esp
 - أوامر تحقق الحالة:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 git status --short --branch
 git log -5 --oneline
 uv pip list --python lab/voice-env/bin/python
@@ -75,7 +75,7 @@ df -h .
 - أول خطوة معلّقة: الحصول محلياً على ملف CSV لقياسات 24 ساعة من منشورات مُصرح بها، مع baseline مماثل كافٍ، أو ترك الأداء معلقاً إذا ماكو وصول. بعد إنشاء `lab/imports/platform-metrics-24h.csv`, شغّل:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv --output lab/evidence/performance-decision-run-01.json
 ```
 
@@ -86,7 +86,7 @@ python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv -
 تشغيل المحرر على localhost فقط:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory/lab/motion-canvas
+cd $(git rev-parse --show-toplevel)/lab/motion-canvas
 npm run start -- --host 127.0.0.1 --port 9000 --strictPort
 ```
 
@@ -106,7 +106,7 @@ npm run start -- --host 127.0.0.1 --port 9000 --strictPort
 لتشغيله يدوياً من جذر المشروع بعد مراجعة التنبيهات:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 N8N_LISTEN_ADDRESS=127.0.0.1 N8N_HOST=127.0.0.1 N8N_PORT=5678 N8N_PROTOCOL=http N8N_USER_FOLDER="$PWD/lab/n8n-local/data" N8N_DIAGNOSTICS_ENABLED=false N8N_PERSONALIZATION_ENABLED=false N8N_VERSION_NOTIFICATIONS_ENABLED=false N8N_TEMPLATES_ENABLED=false ./lab/n8n-local/node_modules/.bin/n8n start
 ```
 
@@ -237,3 +237,157 @@ python3 tools/test_content_package_pipeline.py
 - شغّلت `tools/review_content_package_render.py` على الاتجاهين: 7/7 فحوص آلية PASS لكل اتجاه (فك الفيديو، الأبعاد/المدة/FPS/الإطارات/الصوت، اختلاف أربع لقطات زمنية، أبعاد وعدد PNG، paths، وسم TEST_ONLY، وعدم التباس الإنتاج، تعطيل النشر). `python3 tools/test_content_package_pipeline.py` PASS؛ رفض ملف/حزمة ناقصة، استأنف الانقطاع، ورفض الاستبدال. `py_compile`, `node --check lab/motion.mjs`, و`git diff --check` PASS.
 - فتحت الفيديو العربي والإنكليزي محلياً في QuickTime، لكن واجهة المراجعة لم تتيح لي معاينة/تأكيد تشغيل متصل داخل الجلسة؛ لذلك لا أسجل أن السلاسة اجتازت الفحص. Contact Sheet يعرض لقطات ساكنة موزعة من الفيديوين فقط. اطلب من المستخدم تشغيلهما فعلياً ومراجعة الذوق والسلاسة والإيقاع. قائمة `human-review-TEST_ONLY.md` الجديدة تبقي كل البنود بانتظار المستخدم: وضوح/حجم النص، RTL، التباين والقص، التنوع والسلاسة، الإيقاع، الذوق، ترابط Carousel، وضوح Storyboard والترجمة.
 - التعليمات المختصرة في README. إعادة التشغيل باختيار `--visual-direction spotlight` واستخدام مجلد `TEST_ONLY` جديد؛ لا تستبدل أي إخراج قديم. بوابات الحقوق والجودة والتصدير والنشر بقيت مغلقة، والصوت غير موجود. الخطوة التالية: شغّل فيديوهَي Spotlight وشاهد كل واحد كاملاً؛ بعد رأيك حدّث قائمة المراجعة يدوياً فقط ولا تغيّر اعتماد البوابات قبل موافقتك الصريحة.
+
+## استئناف 2026-11-17: ثلاثة اتجاهات بصرية جديدة بعد رفض Spotlight
+
+- بدأت من `main` وHEAD الفعلي `6915741`؛ كانت الشجرة نظيفة. راجعت `HANDOFF.md` و`AGENTS.md` وأوراق معاينة `Spotlight v3`. أتعامل مع Spotlight كمرجع للمشكلة فقط، ولا أوصي باعتماده أو متابعة ترقيعه. ما تغيّر `render-04` أو `review-02` أو مجلدات المخرجات القديمة.
+- تشخيص Spotlight: تسلسل رأسي ثابت (عنوان، كوب مركزي، شريط سفلي) يترك فراغاً غير مقصود؛ خلفية داكنة مع شريط مائل متكرر؛ الرسم الصغير لا يوازن حجم الإطار؛ الكوب/الدائرة/البخار يتكررون كأنهم هوية؛ الحركة تغيّر موقع/مقياس/حلقة تركيز ولا تصنع انتقالاً سردياً كافياً؛ تبديل النص وحده لا يضمن إيقاعاً. التوافق بين Geeza Pro وArial يحتاج حكم بصري. التشغيل المتصل لـSpotlight لم يُشاهد.
+- أضفت ثلاثة اتجاهات مختلفة عبر SVG مرسوم محلياً وخطوط النظام الموجودة فقط: `fieldnotes` (دفتر ملاحظات فاتح ورسوم للون/الضوء/البخار)، `typeplay` (ملصق طباعي هندسي متحرك)، و`gallery` (أشكال حلقية طبقية بهوية أزرق/مرجاني/ليموني). `fieldnotes` لا يعرض الكوب في كل مشهد، و`typeplay` يستبدل رسمه بأشكال في بعض مشاهد Carousel وStoryboard؛ `gallery` يبقي الحلقات متكررة وهذا قيد موثق. لم أغيّر النص أو معناه ولم أضف أصولاً خارجية أو صوتاً.
+- عالجت عيوباً ظهرت في المعاينة التكرارية: انقصّ عنوان Carousel الإنكليزي في `typeplay` ثم خُفّض حد اللف ليظهر بسطرين؛ صار نص `gallery` السفلي أزرق داكناً فوق المساحة الفاتحة؛ نقلت التسميات اللاتينية لجهة آمنة حتى لا تخرج من الحافة العربية؛ فصلت نص Storyboard الإنكليزي عن الرسم؛ خفّضت حجم رسم الكوب في `gallery`. المخرجات الأقدم للاتجاهات التجريبية بقيت محفوظة، والمجلدات النهائية هي `fieldnotes-v3` و`typeplay-v4` و`gallery-v3`.
+- المعاينات النهائية:
+  - `fieldnotes`: Contact sheet `lab/evidence/content-package-demo-TEST_ONLY-visual-fieldnotes-v3-review-02/content-package-contact-sheet-TEST_ONLY.png`؛ فيديو AR/EN في `lab/evidence/content-package-demo-TEST_ONLY-visual-fieldnotes-v3/artifacts/`.
+  - `typeplay`: Contact sheet `lab/evidence/content-package-demo-TEST_ONLY-visual-typeplay-v4-review-02/content-package-contact-sheet-TEST_ONLY.png`؛ فيديو AR/EN في `lab/evidence/content-package-demo-TEST_ONLY-visual-typeplay-v4/artifacts/`.
+  - `gallery`: Contact sheet `lab/evidence/content-package-demo-TEST_ONLY-visual-gallery-v3-review-02/content-package-contact-sheet-TEST_ONLY.png`؛ فيديو AR/EN في `lab/evidence/content-package-demo-TEST_ONLY-visual-gallery-v3/artifacts/`.
+  - المقارنة والتشخيص والقياسات في `lab/evidence/content-package-demo-TEST_ONLY-visual-comparison/visual-directions-comparison-TEST_ONLY.md` و`motion-frame-analysis-TEST_ONLY.json`. قوائم المراجعة في كل مجلد review؛ البنود كلها بانتظار المستخدم.
+- فحوص كل اتجاه: `tools/review_content_package_render.py` PASS، 7/7 لكل مجموعة؛ فحص H.264 وفك كامل، 1080×1920 / 24fps / 120 إطاراً / 5 ثوانٍ، بلا صوت، عشر PNG Carousel و12 لوحة Storyboard بأبعادها الصحيحة، ووسم TEST_ONLY وتعطيل النشر. حللت الإطارات الـ120 لكل فيديو على نسخة 48×86 رمادية؛ تغيّر بكسل في 119/119 انتقالاً. هذه إشارة اختلاف بكسلي وليست حكماً على الحركة أو السلاسة.
+- القياسات (الوقت، CPU أبناء، الحجم، التباين) مدونة في تقرير المقارنة: `fieldnotes` 40.608s و2,033,024 B؛ `typeplay` 40.849s و2,336,903 B؛ `gallery` 41.013s و2,813,228 B. تباين العنوان/النص الثانوي حسب الألوان الأساسية: fieldnotes 11.87:1 / 6.45:1، typeplay 10.94:1 / 8.15:1، gallery 8.54:1 / 7.36:1.
+- شغّلت `python3 tools/test_content_package_pipeline.py`: PASS؛ رفض مدخلاً وحزمة ناقصين، استأنف render متوقفاً بـ`fieldnotes`، رفض استئناف بإعداد اتجاه مختلف، ورفض الكتابة فوق تقرير موجود. كما نجح `node --check lab/motion.mjs` و`python3 -m py_compile tools/render_content_package.py tools/test_content_package_pipeline.py tools/review_content_package_render.py`. فشل أمر توليد واحد بسبب كتابة `tools.render_content_package.py` بنقطة بدل `/`؛ صححته وأنتجت الاتجاهات بنجاح.
+- README محدث. لم تُشاهد ملفات Short بتشغيل متصل داخل الجلسة؛ يجب على المستخدم تشغيل الفيديوهات ومراجعة السلاسة والذوق وسهولة القراءة على الهاتف وتوازن النص/الصورة والترجمة. الموصى بمشاهدتهما أولاً `fieldnotes` (وضوح معرفي) و`typeplay` (حركة طباعية)، وهذا ترتيب للمعاينة فقط، مو اعتماد أو اختيار نهائي. `gallery` ما زال خياراً للمقارنة.
+- كل شيء `TEST_ONLY` ومحلي وصامت؛ الحقوق والجودة والتصدير والنشر غير معتمدة/مغلقة. لا n8n ولا حسابات ولا منصات. لا commit الآن بطلب المستخدم؛ الملفات المتعقبة معدّلة محلياً وغير محفوظة في commit. الخطوة التالية: اطلب اختيار المستخدم بعد فتح Contact sheets وتشغيل مقاطع `fieldnotes` و`typeplay`، ثم حدّث القرار/قائمة المراجعة وبعد موافقته احفظ التعديلات محلياً من دون push.
+
+## استئناف 2026-11-17: مقارنة مكتبات موشن جاهزة
+
+- البداية تحققت: `main`, HEAD `6915741`. ملفات العمل المتعقبة من الدفعة السابقة ظلت معدّلة كما هي؛ ما مسحتها ولا سويت commit. ما تغير محرك المصنع أو n8n، وما صار نشر.
+- أنشأت معاينة معزولة تحت `lab/evidence/motion-engine-compare-TEST_ONLY/` واستخدمت Motion Canvas المثبت `3.17.2` مع Node/npm وFFmpeg الموجودين. استخدمت 3 تكوينات معرفية مترابطة (افتتاحية عدسة/بخار، بطاقات مقارنة، خاتمة طباعية/حلقية) بنص عربي أبيض وإنكليزي، ورسوم مرسومة بالكود وخطوط النظام. العرض المتصل شوهد داخل المحرر للغتين.
+- أصلحت غلطة ظهور الشرح والخاتمة شفافة، وبعدها عالجت قصّ الكلمات العربية الصغيرة داخل البطاقة بأرقام تسلسل `01–03`؛ النص العربي الأساسي باقٍ بالعناوين والسطر المساند. contact sheet: `lab/evidence/motion-engine-compare-TEST_ONLY/motion-canvas-contact-sheet-TEST_ONLY.png`. MP4: `motion-canvas/motion-canvas-ar-v2-TEST_ONLY.mp4` و`motion-canvas/motion-canvas-en-TEST_ONLY.mp4` داخل مجلد المقارنة.
+- النتيجة الفعلية لكل فيديو: H.264، `1080×1920`, `24fps`, 141 إطاراً، 5.875 ثانية، بلا صوت. decode كامل نجح؛ الأحجام 515,231 و575,869 بايت. كتابة تسلسل الإطارات حسب الطوابع الزمنية قرابة 1.69 و1.72 ثانية؛ تحويل FFmpeg قرابة 0.44 و0.45 ثانية؛ أقصى RSS للترميز 1.14GB تقريباً. ذروة ذاكرة مهمة المتصفح لم تُقَس. `tsc --noEmit` و`git diff --check` نجحا.
+- راجعت Motion Canvas وأمثلة المشروع؛ الأمثلة MIT لكن مستودع الأمثلة يعتمد 3.15.0 وVite 4 وبعض الأصول تحتاج تدقيقاً منفصلاً. تقرير المقارنة: `lab/evidence/motion-engine-compare-TEST_ONLY/engine-comparison-TEST_ONLY.md`.
+- RenderComp: راجعت commit `f648980` وثلاثة مكونات. الكود والقوالب MIT (11MB source-only)، لكن Remotion `4.0.518` له ترخيص proprietary منفصل؛ ما ثبتت أهليتنا للترخيص المجاني وما ثبتت الحزمة الكبيرة/المتصفح. لا زمن رندر أو ذاكرة مقاسة ولا تقييم عربية تنفيذي.
+- OpenMontage: راجعت SHA `2e003e65` فقط. AGPL-3.0، والمتطلبات تشمل Python/FFmpeg وNode patched `24.22.1+` أو المسارات الموثقة الأخرى؛ الموجود `24.21.0`. `make setup` يثبت Python dependencies وPiper وRemotion composer؛ لذلك لا clone/install/run بهالدفعة ولا ترقية Node.
+- التوصية العملية: استمر باختبار Motion Canvas الحالي كمرشح فقط، ولا تبدّل محرك المصنع ولا تعتمد تجارياً. RenderComp يبقى مشروطاً بحسم Remotion license؛ OpenMontage يبقى مؤجلاً لمتطلبات Node وAGPL وحجم التهيئة. بوابات الحقوق والجودة والتصدير والنشر بعدها مغلقة.
+- الخطوة التالية المحددة: افتح contact sheet وشغّل فيديو AR/EN، ثم أعطني رأيك بالسلاسة والذوق وقراءة العربي على هاتف. لا يوجد تقييم بشري أو اختيار نهائي مسجل. ما صار commit، لأن مراجعة الاتجاهات البشرية بعدها معلقة؛ `HEAD` ما زال `6915741`.
+
+## استئناف 2026-11-18: درجات موشن Motion Canvas
+
+- بدأت من `main` عند HEAD `6915741`. بقيت تغييرات Git الموجودة من العمل السابق كما هي، وما سويت commit. ما غيرت محرك المصنع أو ملفات المخرجات القديمة، وما أضفت صوتاً أو نشراً أو اتصالاً بمنصة.
+- جهزت مشروعاً معزولاً للمقارنة تحت `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/motion-canvas/` وأعدت استخدام `Motion Canvas 3.17.2` واعتماديات `lab/motion-canvas/node_modules` عبر symlink؛ ما نزلت ولا ثبتت حزم. `tsc --noEmit` و`vite build` نجحا. محاولة `npm run build` فشلت لأن النسخة المعزولة ما بيها script بهذا الاسم؛ شغلت فحص TypeScript وVite مباشرة ونجحا. أضفت ضمن المشروع المعزول إعداد توافق Vite 7 الموجود أصلاً في مشروع Motion Canvas المحلي؛ أول تحميل استخدم اعتماداً مؤقتاً قديماً من Vite وأظهر 504، وبعد إعادة التحميل اشتغل المحرر وبدأ الرندر.
+- `src/motion-kit.ts` يحدد إعدادات الظهور/الخروج والتأخير والرسم والتقريب/الانتقال الجانبي والـparallax ونوع الانتقال لكل درجة. `src/scene.tsx` يربطها بافتتاحية وشرح ومقارنة وخاتمة. النص يظهر كعقدة كاملة، بدون تحريك الحروف العربية منفردة. النص العربي المستخدم بلا تشكيل أصلاً. لم أبدّل المحرك ولم أربطه بمسار الإنتاج.
+- من Motion Canvas صدّرت ستة تسلسلات PNG منفصلة `groupByScene` إلى `motion-canvas/output/project/{calm-ar,calm-en,medium-ar,medium-en,active-ar,active-en}/`. الأعداد: 516، 516، 374، 374، 280، 281 إطاراً (2341 إجمالي). الرندر استغرق قرابة 26 ثانية بحسب شاشة المحرر (23 ثانية ظاهرة مع ETA ثلاث ثوانٍ قبل الاكتمال). ذروة ذاكرة عملية المحرر لم تُقَس.
+- ملفات الفيديو الجديدة وقياسات FFprobe/Ffmeg في مجلد مستقل لكل فيديو:
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/calm-ar-TEST_ONLY/motion-canvas-calm-ar-TEST_ONLY.mp4`
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/calm-en-TEST_ONLY/motion-canvas-calm-en-TEST_ONLY.mp4`
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/medium-ar-TEST_ONLY/motion-canvas-medium-ar-TEST_ONLY.mp4`
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/medium-en-TEST_ONLY/motion-canvas-medium-en-TEST_ONLY.mp4`
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/active-ar-TEST_ONLY/motion-canvas-active-ar-TEST_ONLY.mp4`
+  - `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/active-en-TEST_ONLY/motion-canvas-active-en-TEST_ONLY.mp4`
+- كل المقاطع H.264، `1080×1920`, 24fps، بلا صوت، وفك كاملها نجح. مددها 21.500s للهادئة، 15.583s للمتوسطة، و11.667s للعربية النشطة / 11.708s للإنكليزية النشطة. أحجامها على الترتيب `544488`, `592535`, `583476`, `656756`, `540290`, `604304` بايت. التقرير: `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/motion-canvas-motion-levels-checks-TEST_ONLY.md`. ملفات JSON لكل `ffprobe` ونتيجة فك الترميز بجانب كل فيديو. أسماء الستة كلها موسومة `TEST_ONLY`.
+- ترميز FFmpeg المقاس بـ`/usr/bin/time -l` استغرق لكل ملف 0.72–1.23 ثانية (مجموع 5.49s)، والذروة القصوى المقاسة للتشفير 1.10–1.13 GiB RSS. هذه ذاكرة FFmpeg وقت التشفير، مو قياس ذاكرة Motion Canvas أثناء الرندر.
+- شغّلت التسلسل الكامل في محرر Motion Canvas بوضوح `24 FPS` وشاهدت دورته المتواصلة التي تضم المشاهد الستة؛ تنقلت العربية والإنكليزية بين الافتتاحية والشرح والمقارنة والخاتمة. التسلسل الكلي 1:37.5، والمراجعة كانت بسرعة 2x. هذا يؤكد أن التشغيل تحرك عبر المقاطع، لكنه مو درجة بشرية للسلاسة أو الذوق. contact sheets مأخوذة من بدايات ووسط ونهايات المقاطع: `motion-levels-ar-contact-sheet-TEST_ONLY.png` و`motion-levels-en-contact-sheet-TEST_ONLY.png`.
+- قائمة التقييم محفوظة في `lab/evidence/motion-canvas-motion-levels-TEST_ONLY/human-review-TEST_ONLY.md`، وكل معيار «بانتظار مراجعة المستخدم». الصورة الثابتة لا تبيّن الفرق الزمني بين المستويات؛ للمقارنة شغّل الملفات نفسها. الفروق المعلنة في الإعدادات: `calm` ظهور fade وانتقالات dissolve/soft-rise؛ `medium` rise مع push/wipe؛ `active` slide مع zoom/push/wipe. المدد الأقصر للنشطة تعني إيقاعاً أسرع، والحكم على ملاءمته متروك للمستخدم.
+- أوامر الإعادة والتحقق:
+
+```sh
+cd lab/evidence/motion-canvas-motion-levels-TEST_ONLY/motion-canvas
+./node_modules/.bin/tsc --noEmit -p tsconfig.json
+./node_modules/.bin/vite build
+npm run start -- --port 4175
+```
+
+افتح `http://127.0.0.1:4175/`، اضغط `RENDER` بعد التأكد أن مجلدات output جديدة أو استخدم مجلداً جديداً، ثم شفّر تسلسل كل مشهد بالأمر الآتي من مجلد المشروع:
+
+```sh
+ffmpeg -framerate 24 -i output/project/<scene>/%06d.png -an -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart <new-TEST_ONLY.mp4>
+ffprobe -v error -show_entries format=duration,size:stream=codec_name,codec_type,width,height,r_frame_rate,avg_frame_rate,nb_frames,pix_fmt -of json <new-TEST_ONLY.mp4>
+ffmpeg -v error -i <new-TEST_ONLY.mp4> -f null -
+```
+
+- الوضع الحالي: لا commit إلى أن يختار المستخدم المستوى. لا توجد موافقة مسجلة على الجودة أو الحقوق أو الاستخدام التجاري أو التصدير والنشر. الخطوة المعلقة: افتح Contact sheets ثم شغّل المقاطع الستة، ودوّن أي مستوى تفضله أو ملاحظات الإيقاع والتنوع وقراءة العربي/الإنكليزي في قائمة `human-review-TEST_ONLY.md`. أبقِ كل شيء محلياً وموسوماً `TEST_ONLY`.
+
+## استئناف 2026-11-18: اختيار موشن بحسب معنى المشهد
+
+- بدأت من `main` عند `69157419920f5fac8d2e018ff499d8945d29d58c`. تعليمات `AGENTS.md` تقول اقرأ هذا الملف أولاً، واستخدم الموجود، واختبر وسجّل قبل commit. بقيت تغييرات Git التي كانت موجودة مسبقاً في `README.md` و`lab/motion.mjs` وأدوات الحزمة و`HANDOFF.md` دون استبدال أو إعادة ضبط. لم أعمل commit لأن المستخدم طلب مراجعة المعاينات أولاً.
+- راجعت مخرجات مستويات الحركة السابقة وملفات Motion Canvas الحالي. الفجوة كانت اختيار حركات متقاربة تختلف غالباً بسرعة/مدة. التجربة الجديدة معزولة على Motion Canvas `3.17.2` المثبت، من دون تبديل المحرك أو تثبيت Remotion أو تنزيل حزم/أصول من المستودعات. كشف تدقيق الكود أن النسخة الأولى كانت تعيّن الحركة مسبقاً؛ لذلك أضفت قياساً قواعدياً من قائمة مرشحين حسب الدور وكلمات المعنى والتكوين والعنوان، وربطت معرّف الحركة المختارة بفروع الرندر. المقيّم محدود بهذه المفردات وليس فهماً لغوياً عاماً.
+- التقرير التفصيلي، التراخيص، سجل الاختيار والدرجات والقياسات والقيود: `docs/MOTION_CONTENT_SELECTION_TEST_ONLY.md`. قائمة الدرجات البشرية: `lab/evidence/motion-content-selection-TEST_ONLY/human-review-TEST_ONLY.md` (كلها «بانتظار مراجعة المستخدم»). ناتج المقيّم: `lab/evidence/motion-content-selection-TEST_ONLY/motion-selection-rules-TEST_ONLY.json`. بقي ملف `motion-selection-TEST_ONLY.json` والمخرجات الأولية محفوظة للمقارنة.
+- أُنتجت 4 معاينات أحدث غير مستبدلة: `lab/evidence/motion-content-selection-TEST_ONLY/renders-rules-TEST_ONLY/{concept-ar-white-rules-TEST_ONLY.mp4,concept-en-white-rules-TEST_ONLY.mp4,signals-ar-white-rules-TEST_ONLY.mp4,signals-en-white-rules-TEST_ONLY.mp4}`. أوراق المشاهد: `lab/evidence/motion-content-selection-TEST_ONLY/scene-contact-sheets-rules-TEST_ONLY/` (أربع ملفات لغة/موضوع). كل المخرجات محفوظة تحت `lab/evidence/` ومستثناة من Git.
+- الاختيار القواعدي الناتج: `concept` افتتاحية `focal-aperture-reveal`، شرح `causal-curve-trace`، مقارنة `single-to-sequence-match`، وخاتمة `idea-line-carry`. `signals`: `signal-constellation-gather`، رسم اتجاه `trend-curve-build`، مقارنة `point-versus-trend-focus`، وخاتمة `pattern-to-thesis-carry`. لكل حركة انتقال ووتيرة وسبب ومصدر وتكييف موثق. AR وEN ينتجان اختياراً متطابقاً للمعنى نفسه.
+- المستودعات الخارجية كانت مصادر أفكار فقط: أمثلة Motion Canvas MIT؛ Opus Motion Library MIT؛ RenderComp MIT للقوالب لكن Remotion بمحركه وترخيصه المنفصل؛ GTKottman MIT لكن مكوناته تعتمد Remotion. لم تُنسخ ملفات منها. راجع روابط وcommits وتواريخ الفحص في التقرير. لا اعتماد تجاري للمكونات بعد؛ الاعتماد على المكتبات كاملة غير مبرر حالياً.
+- الفحوص الفعلية للنسخة القواعدية: `tsc --noEmit -p tsconfig.json` و`vite build` PASS (858 modules، نحو 1.10s)، JSON للمقيّم و`node --check` PASS. FFprobe أكد لكل MP4 H.264 بدقة `1080×1920` و`24fps` وبلا صوت: 226/226/239/240 إطاراً، ومدد `9.4167/9.4167/9.9583/10.000s`. فك الترميز الكامل بـ`ffmpeg -v error -i <video> -f null -` نجح للأربعة. الأسماء موسومة TEST_ONLY.
+- شُغّل المحرر المحلي `http://127.0.0.1:4177/` وشوهد عند 24fps يتقدم إلى 733/930 إطاراً ثم يكمل ويلف إلى 144؛ التشغيل متصل على تسلسل 38.75 ثانية، وليس حكماً بشرياً على الذوق. `/usr/bin/time -l` لترميز FFmpeg بالتتابع سجل 0.62–0.73s لكل ملف، وذروة RSS 1,147,781,120–1,181,958,144 bytes وuser CPU 4.03–4.29s. لا قياس لذاكرة/زمن Motion Canvas أثناء تكوين الإطارات.
+- الملاحظات الأولية: العربية متصلة كعقدة RTL، ولا يظهر قص في اللقطات الثابتة بالحجم الكامل؛ يلزم فحص القراءة على الهاتف من المستخدم. افتتاح `signals` لا يُظهر تجمّع كل النقاط بوضوح في اللقطة المختارة، ودائرته الخلفية مقصوصة طرفياً؛ سجّلتها عيباً بصرياً محتملاً. جسر الانتقال قد يظهر لوحتين جزئيتين. لا صوت ولا بيانات حقيقية ولا نشر. الجودة والحقوق والتصدير والنشر تبقى مغلقة.
+- الخطوة المعلقة: المستخدم يشاهد MP4 الأربعة داخل `renders-rules-TEST_ONLY/` وأوراق المشاهد الأربعة داخل `scene-contact-sheets-rules-TEST_ONLY/`، ويسجل التفضيل/الملاحظات في `human-review-TEST_ONLY.md`. افتح الملفات بمشغل محلي أو المحرر على `http://127.0.0.1:4177/`. عيب افتتاح `signals` ما زال ظاهراً: بعض النقاط مفقودة من اللقطة الثابتة والدائرة الخلفية مقصوصة الطرف؛ راجعه قبل قرار الدمج. بعد التقييم فقط تتحدد الجولة التالية؛ لا تعمل commit حتى ذلك الحين.
+
+## استئناف 2026-11-18: إصلاح تغطية انتقالات Motion Canvas
+
+- بدأت من `main` عند `6915741`، وقرأت تعليمات `AGENTS.md` و`HANDOFF.md`. بقيت تعديلات المستخدم السابقة في README وأدوات الحزمة والتقرير كما هي؛ لم ألمس StageCore أو Kids Studio، ولم أشغّل n8n أو أنشر شيئاً. ماكو commit جديد بناءً على طلب المستخدم.
+- أظهر فحص إطارات الرندر السابق أن اللوحة الداخلة كانت تكشف الخلفية خارج حدودها أثناء الانتقال. تجربة المزج المباشر مع إعادة الكاميرا `motion-canvas-transition-repair-TEST_ONLY/` ما حققت الشرط، لذلك أبقيتها كدليل فشل ولم أستبدلها.
+- التشخيص: الكاميرا المشتركة تحتفظ بتحويلات المشهد السابق عند حد الانتقال، والمزج المتزامن يخفّض اللوحة القديمة قبل ما تغطي الجديدة الإطار. في نسخة معزولة جديدة عدّلت `passTransition` فقط: إعادة الكاميرا لوضعها الافتراضي عند الحد، تثبيت اللوحتين على `[0,0]` وبحجم `[1080,1920]` و`scale=1` و`rotation=0`، إبقاء القديمة معتمة إلى أن تصل الجديدة للحجم/الموضع الكامل، واستخدام خط/حلقة الجسر كطبقة انتقال فقط. محتوى ومكونات وحركة المشاهد الداخلية ما تغيّرت. ماكو قناع يغيّر حجم مجموعة المشهد.
+- النسخة الجديدة: `lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-transition-overlay-repair-TEST_ONLY/`؛ المعاينات المشفّرة: `lab/evidence/motion-content-selection-TEST_ONLY/renders-transition-overlay-repair-TEST_ONLY/`. الملفات الأربعة `concept-ar-transition-overlay-repair-TEST_ONLY.mp4`, `concept-en-transition-overlay-repair-TEST_ONLY.mp4`, `signals-ar-transition-overlay-repair-TEST_ONLY.mp4`, `signals-en-transition-overlay-repair-TEST_ONLY.mp4`.
+- أوراق إطارات الحد (قبل/أثناء/بعد لكل انتقال، لكل لغة): `lab/evidence/motion-content-selection-TEST_ONLY/transition-review-repair-TEST_ONLY/{concept-ar,concept-en,signals-ar,signals-en}-boundary-frames-v2-TEST_ONLY.png`. أرقام الإطارات المشتركة بين لغتي كل موضوع: `concept` (26/32/40)، (91/109/117)، (157/163/171)؛ `signals` (24/32/40)، (101/109/117)، (157/165/173). بمراجعة الإطارات يظهر كشف اتجاهي مقصود: الجزء الذي يدخل من اللوحة الجديدة يحل محل القديمة، والجزء غير المكشوف يبقى من اللوحة القديمة؛ ما ظهرت مساحة من خلفية الجذر أو نهاية ناقصة. هذا قص انتقالي عند حافة العرض، وليس تصغيراً أو قناعاً على المشهد. أرقام AFTER مختارة بعد اكتمال التغطية.
+- اختبار التشغيل المحلي المتصل على `http://127.0.0.1:4180/`: شغّلت تسلسل Motion Canvas كامل (886 إطاراً، `1080×1920`, 24fps، قرابة 36.92s)، وتابعت وصوله لنهاية التسلسل ثم دورانه للبداية؛ الواجهة عرضت `24 FPS`. مشاهدة التشغيل المتصل أُجريت على التسلسل المركّب، بالإضافة لمراجعة أوراق حدود الانتقالات؛ هذا لا يمنح موافقة جودة أو ذوق.
+- الفحوص: `./node_modules/.bin/tsc --noEmit -p tsconfig.json` PASS؛ `./node_modules/.bin/vite build` PASS (858 modules، نحو ثانية). حُوّلت الصور بـ`ffmpeg` إلى MP4 H.264؛ `ffprobe` أكد `1080×1920`, 24fps، بلا audio stream، ومدد/إطارات `concept` 9.1667s/220، `signals-ar` 9.2917s/223، `signals-en` 9.3333s/224. `ffmpeg -v error -i <file> -f null -` نجح للأربعة. الأسماء والمجلدات كلها `TEST_ONLY`، والمخرجات القديمة محفوظة.
+- خطوات الإعادة: افتح MP4 بـ`open lab/evidence/motion-content-selection-TEST_ONLY/renders-transition-overlay-repair-TEST_ONLY/concept-ar-transition-overlay-repair-TEST_ONLY.mp4` (بدّل اسم اللغة/الموضوع لبقية الملفات). لإعادة بناء الصور افتح `http://127.0.0.1:4180/` واضغط `RENDER` بعد التأكد أن `output/project/` لم يعد مستخدماً لمخرجات سابقة؛ لتشفير sequence:
+
+```sh
+ffmpeg -framerate 24 -start_number 0 -i output/project/<scene>/%06d.png -c:v libx264 -crf 18 -pix_fmt yuv420p -an <new-TEST_ONLY.mp4>
+ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate,nb_frames -show_entries format=duration,size -of default=noprint_wrappers=1 <new-TEST_ONLY.mp4>
+```
+
+- المطلوب من المستخدم: مراجعة الفيديوهات والانتقالات بصرياً، خصوصاً هل حركة الكشف مقبولة أم يفضّل انتقالاً مختلفاً. لا اعتماد إنتاج ولا فتح بوابات الحقوق أو الجودة أو التصدير. لا commit حتى تكتمل هذه المراجعة؛ بعد ذلك تُدمج آلية الانتقال المطلوبة بالمصدر القابل لإعادة الاستخدام إن وافق المستخدم.
+
+## استئناف 2026-11-18: إزالة القوس العابر من الانتقال
+
+- بدأت من `main` وHEAD `6915741`، وراجعت `AGENTS.md` و`HANDOFF.md` وحالة الملفات. لا commit ولا دمج بالمصدر بناءً على طلب المستخدم؛ أبقيت مخرجات انتقال التغطية السابقة ونسخ التجارب السابقة بلا تغيير.
+- مصدر القوس الأصفر هو `Line ref={bridge}` الموضوع خارج لوحات المشهد داخل `<Camera>`، وليس رسماً من المشاهد: `passTransition` كان يغيّر نقاطه إلى Bézier أو دائرة، ثم يحرّك `end`/`scale`/`opacity`. لذلك كان يظهر أثناء الانتقال فقط فوق اللوحتين.
+- أنشأت نسخة معزولة جديدة `lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-transition-clean-TEST_ONLY/`. حذفت عنصر `bridge` وتعريفه وحركاته وتمريره إلى `passTransition` فقط. بقي كشف اللوحة الجديدة فوق القديمة، الاتجاهات والمدة كما هي، والكاميرا/أبعاد/مقياس/تدوير اللوحتين كما بالإصلاح المقبول السابق. احتُفظ بوقت الانتقال الإضافي نفسه بـ`waitFor` دون رسم عنصر زخرفي. محتوى المشاهد ورسمها وحركتها لم يتغير.
+- صدّرت أربع معاينات جديدة إلى `lab/evidence/motion-content-selection-TEST_ONLY/renders-transition-clean-TEST_ONLY/`: `concept-ar-transition-clean-TEST_ONLY.mp4`, `concept-en-transition-clean-TEST_ONLY.mp4`, `signals-ar-transition-clean-TEST_ONLY.mp4`, `signals-en-transition-clean-TEST_ONLY.mp4`. ما استبدلت أي فيديو سابق.
+- راجعت قبل/أثناء/بعد كل انتقال في كل لغة داخل `lab/evidence/motion-content-selection-TEST_ONLY/transition-review-clean-TEST_ONLY/{concept-ar,concept-en,signals-ar,signals-en}-boundary-frames-TEST_ONLY.png`. الإطارات المختارة: `concept` (26/32/40)، (96/104/116)، (152/156/164)؛ `signals` (24/32/40)، (96/104/120)، (160/164/168). خط/قوس الجسر غير موجود في المشاهد أثناء الكشف الجديد. أي خط آخر ظاهر أثناء حد الانتقال تابع للرسم الموجود فعلياً في اللوحة القديمة/الجديدة، مثل مسار مخطط `signals`، وتظهر مطابقته في الإطار قبل/بعد؛ ما أزلت شيئاً من المشاهد.
+- الفحوص: `./node_modules/.bin/tsc --noEmit -p tsconfig.json` PASS؛ `./node_modules/.bin/vite build` PASS (858 modules، قرابة ثانية). `ffprobe` لكل فيديو: H.264، `1080×1920`, 24fps، بلا صوت؛ `concept` 215 إطاراً/8.9583s، `signals-ar` 223/9.2917s، `signals-en` 224/9.3333s. فك الترميز الكامل `ffmpeg -v error -i <file> -f null -` نجح للأربعة. المخرجات كلها محلية وموسومة `TEST_ONLY`.
+- الأمر التالي للمراجعة: `open lab/evidence/motion-content-selection-TEST_ONLY/renders-transition-clean-TEST_ONLY/concept-ar-transition-clean-TEST_ONLY.mp4` (بدّل الاسم لبقية المقاطع). قارِن خصوصاً إطارات `during` في أوراق الحدود مع نسخة `transition-overlay-repair-TEST_ONLY`. مطلوب تقييم المستخدم، لذلك تظل النسخة الجديدة اختبارية ولا تعديل خارج مجلد evidence ولا commit.
+
+## استئناف 2026-11-18: تدقيق حدود المشهد أثناء الانتقال
+
+- بدأت من `main` عند `6915741`؛ راجعت `AGENTS.md` و`HANDOFF.md` وسجل المعاينات. أبقيت جميع تغييرات Git الموجودة قبل هذه الدفعة كما هي (`HANDOFF.md`, `README.md`, `lab/motion.mjs`, أدوات الحزمة، والتقرير غير المتعقب). لا commit ولا دمج بالمصدر القابل لإعادة الاستخدام، حسب طلب المستخدم. ما لمست StageCore أو Kids Studio.
+- فحصت `src/video-scene.tsx` والـ`project.meta` في Motion Canvas `3.17.2`. السبب العام الذي وجدته: اللوحات الأربع كانت `Rect` بحجم كامل لكن من دون قصّ لأبنائها؛ أي رسم يتجاوز حدود لوحته يبقى تحت Camera ويُقص عند جذر المشهد/حافة الشاشة أثناء انتقال اللوحة. لذلك أضفت في نسخة TEST_ONLY فقط `clip={true}` إلى كل لوحات `Rect` القائمة ذات `1080×1920`. هذا يقيّد رسم الأبناء بمسار اللوحة الكامل، ولا يغيّر حجمها أو مركزها أو المقياس/التدوير، ويحافظ على اللوحة الداخلة فوق القديمة، والقديمة معتمة أسفلها، وإزالة `bridge` السابقة. لم أغيّر محتوى أي شكل أو نص.
+- النسخة التشخيصية المعزولة: `lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-transition-panel-clip-TEST_ONLY/`; المدخلات الناتجة من Motion Canvas في `output/project/`. فحص `node audit-panel-clip-TEST_ONLY.mjs` PASS: أربع لوحات محددة بالحجم نفسه، قص محلي لكل لوحة، ترتيب/تحويل الانتقال ثابت، و`bridge` غير موجود. ترميز الفيديو الكامل مع FFmpeg ثم `ffprobe` أكد H.264 و`1080×1920` و`24/1` وبلا صوت، الأعداد 215/215/223/224 إطاراً؛ فك الترميز PASS لكل فيديو.
+- الفيديوهات الجديدة: `lab/evidence/motion-content-selection-TEST_ONLY/renders-transition-panel-clip-TEST_ONLY/{concept-ar,concept-en,signals-ar,signals-en}-transition-panel-clip-TEST_ONLY.mp4`. أحجامها بالبايت: 327258، 373719، 281421، 350652. القياسات المفصلة في `lab/evidence/motion-content-selection-TEST_ONLY/transition-review-panel-clip-v2-TEST_ONLY/technical-checks-panel-clip-v2-TEST_ONLY.json`.
+- أوراق الإطارات الصحيحة: `lab/evidence/motion-content-selection-TEST_ONLY/transition-review-panel-clip-v2-TEST_ONLY/{concept-ar,concept-en,signals-ar,signals-en}-boundary-frames-panel-clip-v2-TEST_ONLY.png`. كل ورقة فيها ثلاثيات قبل/أثناء/بعد للانتقالات الثلاثة. إطارات `concept`: (26/32/40)، (96/104/116)، (152/156/164)؛ `signals`: (24/32/40)، (96/104/120)، (160/164/168). فحصت الصور بصرياً: ماكو gap من خلفية الجذر ولا عنصر bridge عابر؛ الدوائر والمسارات والنصوص نفسها ما زالت في طبقاتها. **حد الكشف المتحرك يحجب جزءاً من عناصر اللوحة عند مروره فوقها**؛ هذا سلوك التغطية المكانية، وليس تجاوزاً لحدود لوحة المشهد. الـclip يعالج خروج الرسم عن حد اللوحة، لكنه لا يجعل كل عنصر ظاهراً كاملاً خلال مرور حد الانتقال.
+- شغّلت معاينة Motion Canvas باستمرار عند Preview `0.5x` و`24fps` عبر خط المشاهد الأربعة. قارنت ذلك بإطارات الرندر النهائي Full `1.0x` بالحجم `1080×1920`. قائمة مراجعة المستخدم محدّثة في `lab/evidence/motion-content-selection-TEST_ONLY/human-review-TEST_ONLY.md`؛ كل القيم بانتظار رأيه ولا توجد موافقة جودة.
+- تجربة بديلة سريعة للعتامة الكاملة على Shape/حاوية `Layout` ظلت معزولة في مجلدات `motion-canvas-transition-composite-TEST_ONLY/`, `motion-canvas-transition-composite-v2-TEST_ONLY/`, `motion-canvas-transition-layout-clip-v3-TEST_ONLY/`, `motion-canvas-transition-layout-clip-v4-TEST_ONLY/`. رصدت بالصور أن أبعاد الـLayout/Cache تتبع مقياس معاينة المحرر وتنتج مساحة ربع إطار، لذلك لم أعتمدها ولم أعدّلها في المصدر. ملفا Contact Sheet الفاشلان من المحاولة الأولى محفوظان في `transition-review-panel-clip-TEST_ONLY/`؛ المعتمد للمراجعة هو مجلد `...panel-clip-v2...` لأن الصور فيه مضمّنة فعلياً.
+- إعادة التشغيل بعد الرجوع للمراجعة: افتح فيديو `concept-ar-transition-panel-clip-TEST_ONLY.mp4` محلياً (أو بقية الملفات)، ثم راجع PNGs في `transition-review-panel-clip-v2-TEST_ONLY/`. لإعادة إنشاء التسلسلات تحتاج Motion Canvas UI على `http://127.0.0.1:4182/` من مجلد النسخة المعزولة ثم `RENDER`، مع مجلد إخراج جديد؛ للتحقق شغّل `node audit-panel-clip-TEST_ONLY.mjs`, `npx tsc --noEmit`, و`python3 review-transition-panel-clip-TEST_ONLY.py` من مجلد النسخة. لا تشغّل الرندر فوق مجلد مخرجات موجود.
+- الخطوة المعلقة: المستخدم يراجع أوراق `DURING` خصوصاً حواف الدوائر والأقواس والنص. إذا كان المقصود منع أي شكل من أن يصبح جزئياً أثناء حركة الكشف، فهذا يتطلب تغيير نوع الانتقال نفسه (مثلاً قطع لحظي أو مزج كامل الإطار)، لأن كل كشف مكاني يحجب الشكل عندما تعبر حافته؛ لم أستبدل الانتقال بهذا القرار ولم أدمج أي تعديل. Commit يظل مؤجلاً حتى المراجعة.
+
+
+## استئناف 2026-11-18: مراجعة بصرية شاملة للخطوط والمسارات والانتقالات
+
+- بدأت من `main` وHEAD الفعلي `6915741`. راجعت `AGENTS.md` و`HANDOFF.md` وأوراق v3 الموجودة. بقيت تغييرات المستخدم السابقة كما كانت؛ لم أعدّلها، ولم أعمل commit أو دمج. كل النسخ الجديدة داخل `lab/evidence/` والمعاينات موسومة `TEST_ONLY`.
+- أسباب العيوب التي ثبتت: النقاط كانت تملك إحداثيات/توقيتاً منفصلاً عن الخط؛ هالة افتتاح `signals` تجاوزت الحد الأيسر؛ خطوط النظام السابقة Geeza Pro/Arial بسيطة وغير متناسقة؛ وحد الكشف المكاني يقصّ العناصر التي تعبره. الخط والمسار صارا يستخدمان نقاط Bézier وتقدماً واحداً، والهالة صارت داخل viewport.
+- استخدمت الخطوط الموجودة محلياً: Cairo للعربية وPoppins للاتينية (SIL OFL 1.1 حسب [Cairo OFL](https://github.com/google/fonts/blob/main/ofl/cairo/OFL.txt) و[Poppins OFL](https://github.com/google/fonts/blob/main/ofl/poppins/OFL.txt)). لم أنزّل الخطوط ولم أضف ملفاتها للمستودع.
+- اختبرت حلول انتقال معزولة متتابعة `v4` إلى `v7`: فصل مجموعة المحتوى، إخفاء المحتوى أثناء كشف الخلفية، ترتيب طبقات `zIndex` صريح، وأخيراً إزالة `clip` من مستطيلات الخلفيات الصلبة فقط مع إبقاء طبقات المحتوى ثابتة ومقصوصة على إطار `1080×1920`. انتقال الغطاء نفسه لم يتغير. `v7` أفضل في عينات `signals`، لكن لم ينهِ المشكلة بكل المشاهد: ورقتا `concept-ar` و`concept-en` تعرضان جزءاً من عنوان الخاتمة عند الإطار 162، ثم يظهر العنوان كاملاً عند 168. لذلك تبقى صلاحية الانتقال الثالث لموضوع `concept` غير محسومة ولا أوصي بدمج أي تغيير للمصدر.
+- النسخة المعزولة الأخيرة: `lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-visual-audit-v7-TEST_ONLY/`. المصدر التجريبي فقط: `src/video-scene.tsx`. الأوراق الأربع في `visual-review-v7-TEST_ONLY/`، وقائمة المراجعة `human-review-TEST_ONLY.md` والتقرير الموحّد `visual-audit-report-TEST_ONLY.md`. نتائج الفحص التقني في `technical-checks-v7-TEST_ONLY.json`.
+- فيديوهات v7: `renders-visual-audit-v7-TEST_ONLY/concept-ar-visual-audit-v7-TEST_ONLY.mp4`، `concept-en-visual-audit-v7-TEST_ONLY.mp4`، `signals-ar-visual-audit-v7-TEST_ONLY.mp4`، `signals-en-visual-audit-v7-TEST_ONLY.mp4`. كلها H.264، `1080×1920`, `24fps`, بلا صوت، فك الترميز بـFFmpeg ناجح، والأسماء موسومة `TEST_ONLY`. سجّل FFprobe العدد والمدة والحجم في JSON.
+- الفحوص الفعلية: `tsc --noEmit` PASS، `vite build` PASS (858 modules)، `node audit-visual-geometry-TEST_ONLY.mjs` PASS (`18/18`)، `python3 build-visual-review-TEST_ONLY.py` PASS، `ffprobe` و`ffmpeg -v error -i <file> -f null -` PASS لكل فيديو. ترميز FFmpeg بين 0.61–0.72 ثانية للفيديو؛ ذروة RSS للترميز فقط 1.15–1.16 GB، ولا تشمل ذاكرة Motion Canvas.
+- تم تشغيل ملفات v3 السابقة الأربعة حتى نهايتها في QuickTime؛ لم أسجل تقييماً للحركة، ولم أشاهد v7 المتصل بعد. مراجعة v7 الحالية مبنية على أوراق إطارات، وبالتالي سلاسة v7 ما زالت بانتظار التشغيل/التقييم البشري. كل بنود الذوق والقراءة والجودة بانتظار المستخدم.
+- **أول خطوة معلّقة:** دقّق `concept-ar` و`concept-en` إطارياً من 156 إلى 170، واعرف هل القصّ بسبب حافة الكشف أم ترتيب/توقيت طبقة الخاتمة. لا تعدّل المصدر القابل لإعادة الاستخدام ولا تدمج، ولا تفتح بوابات الحقوق أو الجودة أو التصدير أو النشر. أمر فتح الورقة: `open lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-visual-audit-v7-TEST_ONLY/visual-review-v7-TEST_ONLY/concept-ar-visual-audit-v7-TEST_ONLY.png`. لتشغيل فيديوها محلياً: `open lab/evidence/motion-content-selection-TEST_ONLY/motion-canvas-visual-audit-v7-TEST_ONLY/renders-visual-audit-v7-TEST_ONLY/concept-ar-visual-audit-v7-TEST_ONLY.mp4`.
+
+
+## استئناف 2026-11-18: مراجعة الحركة وإكمال اختبار الاستعادة المحلي
+
+- بدأت من `main` عند `6915741`؛ احتفظت بكل التغييرات غير المحفوظة الموجودة مسبقاً. لم أعمل commit أو push أو أدمج الحركة بالمصدر. قرأت `AGENTS.md` و`HANDOFF.md` والخارطة، وتحققت من المخرجات الحالية. n8n بقي متوقفاً (لا يوجد listener على `127.0.0.1:5678`).
+- أكملت الجولة المعزولة `motion-canvas-visual-system-v9-TEST_ONLY`: السبب الجذري لقص عنوان خاتمة concept كان عرضه أثناء عبور حد الكشف؛ أخفي المحتوى الأمامي حتى تستقر لوحة السلايد، مع إبقاء كشف السلايد الجديد فوق القديم. سبب حواف الخلفية كان سطح جذر ثابتاً بلون مختلف ينكشف عند camera pan؛ صار سطح bleed يتبع لون المشهد بلا توسيع viewport. لم تُحذف عناصر. مسار Bézier والنقاط يستخدمان مرجعاً هندسياً وتقدماً واحداً. الخطان المحليان Cairo/Poppins مرخصان SIL OFL 1.1 حسب مصدري Google Fonts الرسميين؛ لم أضف أو أنزّل خطوطاً.
+- أُنتجت أربع معاينات `TEST_ONLY` AR/EN لمشاهد `concept` و`signals`، وأربع أوراق إطارات `visual-review-v9b-TEST_ONLY/`. إطارات transition 1/2/3 لكل مشهد تعرض قبل/أثناء/بعد. فحص الأوراق بصرياً أكد اكتمال عنوان الختام بعد الانتقال، سلامة RTL الظاهرة، وتطابق المسار والنقطة؛ التشغيل المتصل والسلاسة والجمال وقراءة الهاتف ما زالت تنتظر المستخدم. قائمة `human-review-TEST_ONLY.md` كلها بانتظار تقييمه. التفاصيل، المسارات والأحجام في [`docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md`](docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md).
+- الفحوص: TypeScript/Vite build PASS (858 modules)، `node audit-visual-system-v9-TEST_ONLY.mjs` PASS 13/13، و`python3 check-videos-v9-TEST_ONLY.py` PASS للأربعة: H.264، 1080×1920، 24fps، فك كامل، بلا صوت. تحقق 2,460 زاوية إطار مستقرة؛ ما ظهر لون جذر أو حافة مكشوفة، وتجاوز المسارات/النقاط 0px. لا اعتبار لهذا اعتماداً بصرياً بشرياً. ترميز FFmpeg 0.52–0.56s لكل ملف وRSS الذروة للمرمّز قرابة 1.03GB؛ لا يقيس ذاكرة Motion Canvas.
+- بعد تجهيز المعاينات واصلت أعلى خطوة محلية قابلة للتنفيذ من خارطة Day 3: اختبار استعادة مخرجات المصنع. أضفت `tools/test_content_package_recovery.py`؛ يرندر حزمة TEST_ONLY ذات 5 ثوانٍ، ينشئ `tar.gz`، يستعيد إلى مسار جديد، يقارن قائمة الملفات والأحجام وSHA-256، ثم يعيد QA وFFprobe. تشغيل ناجح: `python3 tools/test_content_package_recovery.py --run-name content-package-recovery-v2-2026-11-18-TEST_ONLY`. نتج 31 ملفاً في حزمة حجمها 1,857,571 بايت؛ hashes متطابقة؛ فحوص الأصل والاستعادة 7/7 متطابقة، وفيديو AR/EN كل منهما 120 إطاراً/5s/بلا صوت. النشر والصوت والأسرار وn8n غير مشمولة.
+- محاولة أولى محفوظة باسم `content-package-recovery-2026-11-18-TEST_ONLY` استخدمت معاينة ثانية واحدة وفشلت لأن المراجع الموجود يفرض عقد 5 ثوانٍ؛ قُيّد خيار الأداة إلى 5، وأعيد الاختبار في مجلد `v2` الجديد ونجح. لم تُحذف مخرجات الفشل. هذا اختبار استعادة حزمة محتوى فقط، وليس نسخة احتياطية كاملة للنظام أو قاعدة بيانات n8n؛ بقي n8n متوقفاً ولم تدخل بيانات اعتماد ضمنه.
+- الفحوص الإضافية: `python3 tools/test_content_package_pipeline.py` PASS (رفض ملف/حزمة ناقصة، استئناف الانقطاع، رفض الاتجاه المتغير والكتابة فوق الموجود)، `python3 lab/test_checkpoint.py` PASS للحالات الست، `python3 -m py_compile tools/test_content_package_recovery.py` و`node --check lab/motion.mjs` PASS. لم تُستخدم شبكة أو API أو منصة ولم تضاف خدمة مدفوعة.
+- **الخطوة التالية:** شغّل فيديوهات v9 الأربعة وشاهدها كاملة، ثم عبّئ `human-review-TEST_ONLY.md`. بعدها يمكن إصلاح عيب مرئي محدد أو إبقاء التغييرات تجريبية. لا تدمج الحركة ولا تفتح بوابات الجودة/الحقوق/التصدير/النشر قبل المراجعة البشرية. اختبار الاستعادة الحالي مكتمل ضمن نطاقه؛ استعادة النظام الكاملة تبقى مؤجلة حتى توجد سياسة ومصدر محلي آمن لنسخة البيانات، مع إبقاء n8n متوقفاً.
+
+## استئناف 2026-11-22: تجهيز التطوير من جهاز آخر ورفع GitHub
+
+- تأكدت أن المشروع هو المستودع المحلي على الفرع `main`. أخذت نسخة محلية قبل الدمج في `lab/repository/backup-before-github-merge-2026-11-22/`: Git bundle كامل للتحقق والاستعادة، patch لكل تغييرات الملفات المتعقبة، tar للملفات الجديدة، ونسخة من الحالة والسجل وفهرس ملفات `lab/evidence/` التي بقيت مكانها. تحقق `git bundle verify` بنجاح. لم تنسخ المعاينات الكبيرة إلى Git.
+- كان `origin` غير مهيأ أول الجلسة. المستودع `https://github.com/ali96adil/ContentFactory` كان عاماً، فغيّرت ظهوره إلى private وتحققت منه عبر API؛ الحالة الحالية private. الـremote كان يحتوي commit ابتدائي `e0e6721` وسطر `# ContentFactory` فقط في README، وتاريخ المحلي عند `6915741` مستقل عنه. راجعت محتوى README للطرفين ثم نفذت `git merge --allow-unrelated-histories --no-commit origin/main` وعالجت add/add يدوياً: احتفظت بعنوان README البعيد وأضفت إليه محتوى المصنع المفيد وتعليمات التشغيل الحديثة. merge commit الناتج `495bee4`; والداه المحلي `6915741` والبعيد `e0e6721`. لم أستخدم rebase أو force.
+- أضفت تعليمات التطوير في README على macOS/Linux، مع WSL2 كخيار Windows، نسخ الأدوات، أوامر التثبيت والفحص وتشغيل Motion Canvas والرندر. أضفت `.nvmrc` لنسخة Node `24.21.0`، وحولت المسارات الخاصة بحساب/ماك التطوير إلى مسارات نسبية في الوثائق وسجل التقييم. لا حاجة لملف `.env.example` لأن مسار الرندر الحالي لا يقرأ متغيرات بيئة.
+- كان مثال الحزمة موجوداً فقط في `lab/evidence/` المستثنى من Git، وهذا يمنع الاختبار بعد clone. أضفت نسخة نصية اصطناعية خالية من المصادر والأصول والقياسات الحقيقية في `lab/fixtures/content-package-demo-TEST_ONLY.json`، وربطت اختباري pipeline/recovery بها، وجعلتهما ينشئان مجلد الأدلة عند الحاجة. حدّثت عقد الحزمة، وأضاف `.gitignore` تجاهل `lab/imports/`, `.npmrc`, مخازن الاعتماد وملفات قواعد البيانات والسجلات. `lab/evidence/` والمعاينات وقواعد البيانات والبيانات الشخصية مستثناة.
+- فحص الأسرار: استخدمت Gitleaks `8.30.1` الرسمي. تحققت من SHA-256 للأصل `b40ab0ae55c505963e365f271a8d3846efbc170aa17f2607f13df610a9aeb6a5`، ونتائج الفحص محفوظة محلياً تحت `lab/repository/secret-scan-2026-11-22/` (مستثناة من Git). فحص 56 ملفاً متعقباً في شجرة العمل: صفر اكتشافات؛ فحص تاريخ `main` ذي 17 commit: صفر اكتشافات. لم يُطبع أي secret. `lab/repository/` يحوي الأداة والتقارير الاحتياطية فقط ولا يدخل قائمة الإيداع.
+- الفحوص الفعلية على ملفات الاختبار: `python3 lab/test_checkpoint.py` PASS (6 حالات)، `python3 tools/test_content_package_pipeline.py` PASS (رفض النقص، الاستئناف، منع تغيير الإعدادات والاستبدال)، و`python3 tools/test_content_package_recovery.py --run-name content-package-recovery-2026-11-22-TEST_ONLY` PASS: 31 ملفاً، archive `1,857,567` بايت، SHA-256 متطابقة واستعادة ومراجعة FFprobe متطابقتان. `(cd lab/motion-canvas && npm run build)` PASS (847 modules، 0.978s)، و`py_compile`, `node --check lab/motion.mjs`, و`git diff --check` PASS.
+- ملفات الفيديو والصور/المعاينات والتقارير التشغيلية الكبيرة تبقى محلياً تحت `lab/evidence/`، وعدد ملفات evidence وقت النسخ كان 38,111؛ لم تدخل Git. بيانات الاعتماد وقاعدة n8n وNode/Python environments مستثناة كذلك. لم يجرِ اتصال منصة أو نشر. جودة الحركة تبقى بانتظار تقييم المستخدم.
+- بعد `495bee4` أُعيدت تغييرات العمل المحفوظة، وREADME حُلّ يدوياً مرة ثانية ليجمع تعليمات الجهاز الآخر وملاحظات الاتجاهات المحلية. **الخطوة الحالية:** افحص staged changes، شغّل Gitleaks على الملفات المرحّلة، ثم أنشئ commit واضحاً للتغييرات المحلية وارفع `main` بـ`git push origin main` عادي. بعد الرفع تحقق أن `origin/main` يطابق HEAD ويحوي merge الأبويْن.

@@ -1,0 +1,330 @@
+{
+  "contract_version": "content-package.v1",
+  "package_id": "demo-observation-TEST_ONLY",
+  "revision": "demo-01",
+  "lifecycle": {
+    "status": "draft_test_only",
+    "test_only": true,
+    "created_at_utc": ""
+  },
+  "topic": {
+    "topic_id": "topic-coffee-observation-test",
+    "working_title": {
+      "ar_white": "فنجان واحد، ثلاث ملاحظات بصرية",
+      "en": "One Cup, Three Visual Observations"
+    },
+    "audience": "General knowledge audience; demo only",
+    "viewer_need": "A calm prompt for noticing visual details",
+    "single_promise": {
+      "ar_white": "تجربة وصف بصري بسيطة بلا ادعاءات علمية.",
+      "en": "A simple visual-description exercise with no scientific claims."
+    },
+    "excluded_claims": [
+      "No health, temperature, chemical, or safety claims"
+    ]
+  },
+  "fact_base": {
+    "claims": [],
+    "review": {
+      "status": "not_reviewed",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": "No factual claims supplied; any future claim needs sourced human review."
+    }
+  },
+  "sources": [],
+  "copy": {
+    "ar_white": {
+      "short_video": {
+        "hook": "قبل أول رشفة، خذ لحظة لتتأمل فنجانك.",
+        "voiceover": "لاحظ لون السطح وانعكاس الضوء. وإذا ظهر بخار، تأمل حركته. غيّر زاوية النظر ولاحظ ما يتغير في المشهد. ثلاث ملاحظات، وفنجان واحد.",
+        "on_screen_text": [
+          "اللون",
+          "انعكاس الضوء",
+          "البخار إذا ظهر"
+        ],
+        "caption": "تجربة ملاحظة قصيرة مع فنجان قهوتك.",
+        "call_to_action": "ما أول تفصيل لفت انتباهك؟",
+        "target_duration_seconds": 20,
+        "visual_beats": [
+          "لقطة شكلية مرسومة محلياً لكوب",
+          "تفاصيل لونية مجردة",
+          "نهاية بسؤال للمشاهد"
+        ]
+      },
+      "carousel": {
+        "caption": "ثلاث ملاحظات بصرية، من دون استعجال.",
+        "slides": [
+          {
+            "heading": "فنجان واحد، ثلاث ملاحظات",
+            "body": "ابدأ بالنظر قبل أول رشفة.",
+            "visual_note": "رسم هندسي أصلي لكوب"
+          },
+          {
+            "heading": "لاحظ اللون",
+            "body": "صف ما تراه بكلماتك.",
+            "visual_note": "مساحة لونية مجردة"
+          },
+          {
+            "heading": "راقب انعكاس الضوء",
+            "body": "حرّك زاوية نظرك ولاحظ التغيير.",
+            "visual_note": "خطوط مرسومة محلياً"
+          },
+          {
+            "heading": "هل ظهر بخار؟",
+            "body": "إذا ظهر، تابع حركته للحظة.",
+            "visual_note": "خطوط اختيارية، بلا صورة خارجية"
+          },
+          {
+            "heading": "ما الذي لاحظته أولاً؟",
+            "body": "اكتب ملاحظتك بكلمة واحدة.",
+            "visual_note": "خلفية بسيطة"
+          }
+        ],
+        "call_to_action": "شارك ملاحظتك في كلمة واحدة.",
+        "target_aspect_ratio": "4:5 draft; adapt per destination"
+      },
+      "youtube_long": {
+        "title": "فنجان واحد، ثلاث ملاحظات بصرية",
+        "opening": "لنأخذ لحظة قصيرة لوصف ما نراه في فنجان القهوة، من دون استعجال أو ادعاء علمي غير موثق.",
+        "sections": [
+          {
+            "heading": "ابدأ باللون",
+            "talking_points": [
+              "صف اللون كما يبدو لك",
+              "استخدم وصفك الشخصي لا حكماً عاماً"
+            ]
+          },
+          {
+            "heading": "غيّر زاوية النظر",
+            "talking_points": [
+              "لاحظ انعكاس الضوء إن ظهر",
+              "لا تفترض أن كل كوب سيبدو بالطريقة نفسها"
+            ]
+          },
+          {
+            "heading": "البخار اختياري",
+            "talking_points": [
+              "إذا ظهر بخار، صف ما تراه فقط",
+              "لا نستنتج درجة الحرارة أو السلامة من المشاهدة"
+            ]
+          },
+          {
+            "heading": "اختم بملاحظة",
+            "talking_points": [
+              "اختر تفصيلاً واحداً",
+              "اسأل الجمهور عمّا لاحظوه"
+            ]
+          }
+        ],
+        "ending": "قد يلفت المشهد نفسه انتباه كل شخص إلى تفصيل مختلف.",
+        "description": "مسودة مشاهدة بصرية قصيرة. لا تتضمن نصيحة صحية أو ادعاءً علمياً.",
+        "target_duration_minutes": 5,
+        "chapters": []
+      }
+    },
+    "en": {
+      "short_video": {
+        "hook": "Before the first sip, take a moment to notice your cup.",
+        "voiceover": "Look at the surface color and the light reflections. If steam is visible, watch how it moves. Change your viewing angle and notice what changes. Three observations, one cup.",
+        "on_screen_text": [
+          "Color",
+          "Light reflections",
+          "Steam, if visible"
+        ],
+        "caption": "A short visual observation with your cup of coffee.",
+        "call_to_action": "What detail did you notice first?",
+        "target_duration_seconds": 20,
+        "visual_beats": [
+          "Locally drawn geometric cup",
+          "Abstract color details",
+          "End with a viewer question"
+        ]
+      },
+      "carousel": {
+        "caption": "Three visual observations, at an unhurried pace.",
+        "slides": [
+          {
+            "heading": "One cup, three observations",
+            "body": "Start by looking before your first sip.",
+            "visual_note": "Original geometric cup drawing"
+          },
+          {
+            "heading": "Notice the color",
+            "body": "Describe what you see in your own words.",
+            "visual_note": "Abstract color field"
+          },
+          {
+            "heading": "Watch the light",
+            "body": "Change your viewing angle and note the difference.",
+            "visual_note": "Locally drawn lines"
+          },
+          {
+            "heading": "Is there visible steam?",
+            "body": "If so, watch its movement for a moment.",
+            "visual_note": "Optional drawn lines, no external image"
+          },
+          {
+            "heading": "What stood out first?",
+            "body": "Write your observation in one word.",
+            "visual_note": "Simple background"
+          }
+        ],
+        "call_to_action": "Share your observation in one word.",
+        "target_aspect_ratio": "4:5 draft; adapt per destination"
+      },
+      "youtube_long": {
+        "title": "One Cup, Three Visual Observations",
+        "opening": "Let us take a brief moment to describe what we can see in a cup of coffee, without rushing or making unsupported scientific claims.",
+        "sections": [
+          {
+            "heading": "Start with color",
+            "talking_points": [
+              "Describe the color as it appears to you",
+              "Use a personal observation, not a universal judgment"
+            ]
+          },
+          {
+            "heading": "Change your viewing angle",
+            "talking_points": [
+              "Notice a reflection if one is visible",
+              "Do not assume every cup will look the same"
+            ]
+          },
+          {
+            "heading": "Steam is optional",
+            "talking_points": [
+              "If steam is visible, describe only what you observe",
+              "Do not infer temperature or safety from appearance"
+            ]
+          },
+          {
+            "heading": "End with one observation",
+            "talking_points": [
+              "Choose one detail",
+              "Ask viewers what they noticed"
+            ]
+          }
+        ],
+        "ending": "The same scene can draw each person’s attention to a different detail.",
+        "description": "A visual-observation draft. It contains no health advice or scientific claim.",
+        "target_duration_minutes": 5,
+        "chapters": []
+      }
+    }
+  },
+  "assets": [],
+  "platform_adaptations": {
+    "youtube": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "tiktok": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "instagram": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    },
+    "facebook": {
+      "account_alias": "",
+      "adaptation_status": "not_adapted",
+      "publishing_enabled": false,
+      "overrides": {
+        "title": "",
+        "caption": "",
+        "hashtags": [],
+        "format_notes": ""
+      }
+    }
+  },
+  "review_gates": {
+    "facts": {
+      "status": "blocked_no_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "evidence_ids": []
+    },
+    "rights": {
+      "status": "blocked",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "asset_ids_cleared": [],
+      "notes": ""
+    },
+    "arabic_white_language": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "english_language": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "bilingual_parity": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "notes": ""
+    },
+    "quality": {
+      "status": "pending_human_review",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "checklist": []
+    },
+    "audio": {
+      "status": "blocked_unverified_arabic_voice",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "asset_id": ""
+    },
+    "technical_render": {
+      "status": "pending",
+      "reviewer_alias": "",
+      "reviewed_at_utc": "",
+      "artifact_ids": []
+    }
+  },
+  "release_control": {
+    "local_preview_allowed": true,
+    "approval_status": "blocked_demo_only",
+    "approved_revision": "",
+    "external_publication_enabled": false,
+    "external_publication_approved": false,
+    "destination_alias": "",
+    "approved_by": "",
+    "approved_at_utc": ""
+  },
+  "provenance": {
+    "created_by_alias": "",
+    "source_snapshot_sha256": "",
+    "package_sha256": "",
+    "notes": ""
+  }
+}

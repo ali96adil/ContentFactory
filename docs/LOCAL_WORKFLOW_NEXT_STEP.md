@@ -24,7 +24,7 @@
 الـCSV المحلي يجب أن يحتوي على أعمدة [`platform-metrics-template.csv`](../lab/templates/platform-metrics-template.csv). استخدم `data_origin=manual_export` للبيانات المنقولة من تصدير محلي؛ عيّن `rights_status=verified` فقط بعد مراجعة الحقوق، و`quality_status=human_approved` فقط بعد الموافقة البشرية المطلوبة. لا تضع كلمات مرور أو Tokens أو روابط OAuth. طبّق anonymization على معرف الحساب إذا مو مطلوب التحليل بهويته.
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/analyze_platform_metrics.py lab/fixtures/platform-metrics-TEST_ONLY.csv --output lab/evidence/performance-decisions-TEST_ONLY-run-03.json
 ```
 
@@ -49,7 +49,7 @@ python3 tools/analyze_platform_metrics.py lab/fixtures/platform-metrics-TEST_ONL
 استورد المستخدم أو مشغّل مخوّل ملف أداء محلياً بعد 24 ساعة على الأقل من منشور تجريبي مُصرح به، مع ستة baseline comparables على الأقل لكل منصة/لغة/صيغة. ابدأ من نسخة الملف، دون ضبط credentials أو API:
 
 ```sh
-cd /Users/aliadil/Projects/ContentFactory
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv --output lab/evidence/performance-decision-run-01.json
 ```
 

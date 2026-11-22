@@ -342,8 +342,8 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--platform", choices=("all", *sorted(PLATFORMS)), default="all")
-    parser.add_argument("--visual-direction", choices=("editorial", "spotlight"), default="editorial",
-                        help="TEST_ONLY visual template: high-contrast editorial paper or dark spotlight")
+    parser.add_argument("--visual-direction", choices=("editorial", "spotlight", "fieldnotes", "typeplay", "gallery"), default="editorial",
+                        help="TEST_ONLY visual template: editorial, spotlight, fieldnotes, typeplay, or gallery")
     parser.add_argument("--preview-seconds", type=int, default=5,
                         help="silent visual excerpt length; defaults to 5 seconds and never exceeds package target")
     parser.add_argument("--resume", action="store_true")
