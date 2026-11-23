@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 from datetime import datetime
 from pathlib import Path
 from statistics import median
@@ -24,6 +25,8 @@ def number(row: dict[str, str], field: str) -> float:
         value = float(row[field])
     except (KeyError, ValueError) as exc:
         raise ValueError(f"{field} must be numeric") from exc
+    if not math.isfinite(value):
+        raise ValueError(f"{field} must be finite")
     if value < 0:
         raise ValueError(f"{field} cannot be negative")
     return value
