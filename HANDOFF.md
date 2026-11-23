@@ -463,3 +463,11 @@ ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate,nb_fr
 - `tools/test_backup_platform_metrics_ledger.py` يختبر استيراد 26 صفاً `TEST_ONLY`، نسخها واستعادتها مع تطابق digest، منع استبدال وجهة موجودة، ورفض قاعدة ليست ledger. التشغيل المحلي PASS. ربطت الاختبار وفحص py_compile بـ`tools/verify_repo.py` وأضفت أمثلة الأوامر إلى README ودليل المقاييس.
 - فحص CI السابق للرأس `36d232a8a484e185eced1471fd9b39234ddb95f8` نجح على مسار الاستيراد والتحليل التراكمي. تغييرات النسخ والاستعادة الحالية تحتاج تشغيل CI جديد؛ الفحوص الموضعية `test_backup_platform_metrics_ledger.py`, `test_import_platform_metrics.py`, `py_compile` و`git diff --check` مرّت. اختبار المستودع الكامل المحلي يبقى معطلاً قبل البدء بسبب عدم وجود `rsvg-convert`.
 - هذا يغطي backup/restore لسجل المقاييس المحلي فقط؛ ماكو قاعدة n8n أو إعدادات workflow أو Pi بهذه الحزمة. لا ترفع قواعد SQLite إلى Git.
+
+
+## إغلاق اختبار سجل القياسات — 2026-11-24
+
+- اكتمل GitHub Actions run `45282210221` بنجاح على `be309228e20a633ba758b17f331b6527e0b35fa8`؛ تحقق الأمر الموحد من checkpoint، تحليل المقاييس، pipeline، manifest، استيراد سجل القياسات، backup/restore، Python وNode، وMotion Canvas/Vite. كان هذا تشغيل PR واحداً على الحدث `pull_request`.
+- نتيجة التحقق المحلي: الاختبارات الموضعية ناجحة، لكن `python3 tools/verify_repo.py` يتوقف قبل بدء الاختبارات لأن `rsvg-convert` غير متوفر في بيئة التنفيذ. CI يوفّر `librsvg` داخل حاوية مؤقتة؛ لم نثبت أدوات نظام محلياً.
+- حدّثت README ومصفوفة الخطوة التالية لتعكسا الاختبارات الجديدة ورقم الرأس/run. لا تغيير في الكود بهذه الدفعة. PR #1 ما زال Draft وغير مدموج.
+- المسارات البرمجية المتاحة حالياً لها تغطية CI ناجحة. ما يبقى خارج إغلاق هذه الجلسة هو اعتماد بشري على الشكل والقراءة، بيانا�

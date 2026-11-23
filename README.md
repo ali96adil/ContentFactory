@@ -49,7 +49,7 @@ rsvg-convert --version
 python3 tools/verify_repo.py
 ```
 
-يفحص الأمر توفر FFmpeg/FFprobe وlibrsvg وNode/npm، ثم يشغّل اختبارات checkpoint ومحلل الأداء والحزمة واحتواء مسارات manifest والاستعادة، وفحوص Python/Node، وتثبيت Motion Canvas وبناءه. ينشئ مجلد أدلة `TEST_ONLY` باسم جديد لكل استعادة حتى لا يستبدل نتيجة قديمة. GitHub Actions يستعمل أمر التحقق نفسه داخل حاوية Ubuntu مؤقتة؛ بذلك تكون خطوة CI المحلية وCI موحّدة.
+يفحص الأمر توفر FFmpeg/FFprobe وlibrsvg وNode/npm، ثم يشغّل اختبارات checkpoint ومحلل الأداء والحزمة واحتواء مسارات manifest واستيراد سجل القياسات ونسخه/استعادته، وفحوص Python/Node، وتثبيت Motion Canvas وبناءه. ينشئ مجلد أدلة `TEST_ONLY` باسم جديد لكل استعادة حتى لا يستبدل نتيجة قديمة. GitHub Actions يستعمل أمر التحقق نفسه داخل حاوية Ubuntu مؤقتة؛ بذلك تكون خطوة CI المحلية وCI موحّدة.
 
 Motion Canvas اختياري. لاستخدام المحرر، من جذر المستودع اختر Node عبر `nvm use` ثم:
 
