@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import resource
 import shutil
@@ -149,7 +150,12 @@ def validate_package(pkg: object, input_path: Path, selected_platform: str, prev
         for key in ("title", "opening", "ending", "description"):
             require_string(long.get(key), f"copy.{locale}.youtube_long.{key}")
         minutes = long.get("target_duration_minutes")
-        if not isinstance(minutes, (int, float)) or isinstance(minutes, bool) or minutes <= 0:
+        try:
+            valid_minutes = (isinstance(minutes, (int, float)) and not isinstance(minutes, bool)
+                             and math.isfinite(float(minutes)) and minutes > 0)
+        except (OverflowError, ValueError):
+            valid_minutes = False
+        if not valid_minutes:
             raise PackageError(f"copy.{locale}.youtube_long.target_duration_minutes must be positive")
         sections = long.get("sections")
         if not isinstance(sections, list) or len(sections) < 3:

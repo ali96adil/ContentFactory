@@ -45,6 +45,16 @@ def main() -> None:
         assert not incomplete_output.exists()
         assert not incomplete_output.with_name(f".{incomplete_output.name}.work").exists()
 
+        non_finite_path = temp / "non-finite-duration-TEST_ONLY.json"
+        non_finite = json.loads(PACKAGE.read_text(encoding="utf-8"))
+        non_finite["copy"]["en"]["youtube_long"]["target_duration_minutes"] = float("nan")
+        non_finite_path.write_text(json.dumps(non_finite, ensure_ascii=False), encoding="utf-8")
+        non_finite_output = temp / "non-finite-output-TEST_ONLY"
+        rejected_non_finite = run("--input", str(non_finite_path), "--output", str(non_finite_output))
+        assert rejected_non_finite.returncode != 0 and "target_duration_minutes" in rejected_non_finite.stderr
+        assert not non_finite_output.exists()
+        assert not non_finite_output.with_name(f".{non_finite_output.name}.work").exists()
+
         output = temp / "resumable-run-TEST_ONLY"
         interrupted = run("--input", str(PACKAGE), "--output", str(output),
                           "--platform", "all", "--preview-seconds", "1",
@@ -84,7 +94,7 @@ def main() -> None:
         assert overwrite.returncode != 0 and "refusing to overwrite" in overwrite.stderr
         assert sha256(artifacts / "render-report.json") == report_hash
 
-    print("PASS: missing package rejected; incomplete package rejected; interrupted fieldnotes render resumed; changed direction rejected on resume; silent TEST_ONLY outputs rendered; overwrite refused without changing report")
+    print("PASS: missing/incomplete/non-finite package inputs rejected; interrupted fieldnotes render resumed; changed direction rejected on resume; silent TEST_ONLY outputs rendered; overwrite refused without changing report")
 
 
 if __name__ == "__main__":

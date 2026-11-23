@@ -45,6 +45,25 @@ def image_uri(path: Path) -> str:
     return "data:image/jpeg;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
 
 
+def validate_renderer_manifest(artifacts: Path, renderer_result: object) -> None:
+    if not isinstance(renderer_result, list):
+        raise ValueError("renderer manifest must be a JSON array")
+    seen: set[str] = set()
+    for index, item in enumerate(renderer_result):
+        if not isinstance(item, dict):
+            raise ValueError(f"renderer manifest item {index} must be an object")
+        name = item.get("path")
+        if (not isinstance(name, str) or not name or Path(name).name != name
+                or name in {".", ".."} or "TEST_ONLY" not in name):
+            raise ValueError(f"renderer manifest item {index} has an unsafe or unmarked path")
+        if name in seen:
+            raise ValueError(f"renderer manifest contains a duplicate path: {name}")
+        seen.add(name)
+        target = artifacts / name
+        if target.is_symlink() or not target.is_file():
+            raise ValueError(f"renderer manifest path missing or not a regular file: {name}")
+
+
 def add_tile(parts: list[str], x: int, y: int, w: int, h: int, uri: str, label: str, font: int = 22) -> None:
     parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="#142628" stroke="#527f7b"/>')
     parts.append(f'<image x="{x + 8}" y="{y + 8}" width="{w - 16}" height="{h - 48}" href="{uri}" preserveAspectRatio="xMidYMid meet"/>')
@@ -70,8 +89,11 @@ def run(args: argparse.Namespace) -> dict:
     result_path = artifacts / "renderer-result.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
     renderer_result = json.loads(result_path.read_text(encoding="utf-8"))
+    if not isinstance(report, dict):
+        raise ValueError("render report must be a JSON object")
     if report.get("mode") != "TEST_ONLY_LOCAL_PREVIEW" or report.get("external_publication_enabled") is not False or report.get("external_publication_approved") is not False or report.get("audio_present") is not False:
         raise ValueError("render report TEST_ONLY/audio/publication gates failed")
+    validate_renderer_manifest(artifacts, renderer_result)
 
     media = [path for path in files if path.suffix.lower() in {".mp4", ".png", ".jpg", ".jpeg"}]
     if any("TEST_ONLY" not in path.name for path in media):
@@ -133,10 +155,6 @@ def run(args: argparse.Namespace) -> dict:
                 thumbs[path.stem] = thumb
         checks.append({"check": "all_carousel_and_storyboard_png_dimensions", "status": "PASS"})
 
-        for item in renderer_result:
-            file_path = artifacts / item["path"]
-            if not file_path.is_file() or "TEST_ONLY" not in item["path"]:
-                raise ValueError(f"renderer manifest path missing or unmarked: {item.get('path')}")
         if any("TEST_ONLY" not in path.name for path in media):
             raise ValueError("unmarked rendered media filename")
         checks.extend([
@@ -173,11 +191,15 @@ def run(args: argparse.Namespace) -> dict:
             y += row_h + 8
         svg[0] = f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{y + 40}" viewBox="0 0 {width} {y + 40}">'
         svg.append('</svg>')
-        output.mkdir(parents=True)
         svg_path = temp / "contact-sheet.svg"
         svg_path.write_text("\n".join(svg), encoding="utf-8")
-        preview = output / "content-package-contact-sheet-TEST_ONLY.png"
-        command(["rsvg-convert", "--format", "png", "--output", str(preview), str(svg_path)])
+        staged_preview = temp / "content-package-contact-sheet-TEST_ONLY.png"
+        command(["rsvg-convert", "--format", "png", "--output", str(staged_preview), str(svg_path)])
+        preview_bytes = staged_preview.read_bytes()
+
+    output.mkdir(parents=True)
+    preview = output / "content-package-contact-sheet-TEST_ONLY.png"
+    preview.write_bytes(preview_bytes)
 
     review_rows = [
         "| معيار المراجعة البشرية | الحالة | ملاحظات المستخدم |",
