@@ -435,3 +435,10 @@ ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate,nb_fr
 - النتائج المحلية المنفذة على هذا التعديل: `python3 lab/test_checkpoint.py` PASS (6/6)، `python3 tools/test_analyze_platform_metrics.py` PASS (5/5)، `python3 tools/test_review_content_package_render.py` PASS، و`py_compile` لكل أدوات التحقق و`node --check lab/motion.mjs` و`git diff --check` PASS. `python3 tools/verify_repo.py` توقف قبل الاختبارات لأن `rsvg-convert` غير مثبت في بيئة Codex؛ لا استخدام لـsudo ولا تثبيت نظامي.
 - أضفت اختبار manifest إلى `tools/verify_repo.py`. يجب أن يجتاز `tools/test_content_package_pipeline.py` واختبار الاستعادة وبناء Motion Canvas في CI على رأس هذه الدفعة قبل اعتماد نتيجتها.
 - الحالة الخارجية: PR #1 يبقى Draft وغير مدموج. لا اتصالات بمنصات ولا نشر ولا أسرار في المستودع. مراجعة الفيديوهات/الترجمة والحقوق والصوت العربي وبيانات الأداء الفعلية واختبار جهاز Pi تبقى متطلبات خارج الفحص البرمجي؛ n8n ما زال متوقفاً.
+
+## إغلاق دفعة التحقق على GitHub — 2026-11-24
+
+- تشغيل GitHub Actions `45277164412` على الرأس `9381c1e75395584de8872a19dceffb9563107c8d` اكتمل PASS، بما فيه `tools/verify_repo.py`: اختبارات checkpoint والمقاييس وpipeline، اختبار manifest، backup/restore، Python وNode، و`npm ci --legacy-peer-deps` ثم Vite build. الشجرة المحلية طابقت الشجرة البعيدة قبل مزامنتها، وصارت نظيفة على الرأس نفسه.
+- فحص عالي الثقة لأنماط الأسرار مرّ على الملفات المتتبعة وكل تاريخ Git القابل للوصول؛ لم تظهر مفاتيح خاصة أو رموز GitHub/AWS أو تعيينات سرية واضحة. هذا فحص regex محلي وليس ضماناً شاملاً لكل صيغة بيانات حساسة.
+- تحديث مصدر n8n: صفحة الإصدارات الرسمية تعرض `2.48.8` كـstable بتاريخ 2026-11-23؛ تقرير `docs/N8N_AUDIT_REVIEW.md` حُدّث ليعلّم نتيجة dist-tags القديمة كبيانات بتاريخ 2026-11-17. لم نثبت أو ندقق الشجرة الأحدث؛ n8n بقي متوقفاً. تشغيله يظل محجوباً حتى audit منفصل ومراجعة شروط الترخيص.
+- PR #1 ما زال Draft وغير مدموج. الخطوة البرمجية التالية: التحقق من الدفعة التوثيقية الجديدة بعد تسجيل تحديث n8n، ثم إعادة تشغيل CI على آخر رأس. بعد ذلك أكمل ما يمكن محلياً دون حسابات أو Pi؛ لا تفتح بوابات الحقوق والجودة والتصدير والنشر.
