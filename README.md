@@ -88,15 +88,15 @@ python3 tools/test_content_package_recovery.py \
 - `lab/evidence/`: الفيديوهات والصور والتقارير وبيانات التشغيل المحلية؛ مستثناة من Git لأنها قد تكون كبيرة أو شخصية.
 - `HANDOFF.md`: سجل البيئة والنتائج والخطوة التالية. راجع أيضاً `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
 
-لاستيراد CSV أداء مصرح به إلى سجل محلي idempotent، استخدم ملف SQLite جديداً داخل `lab/imports/`، ثم شغّل المحلل على CSV مباشرة:
+لاستيراد CSV أداء مصرح به إلى سجل محلي idempotent، استخدم ملف SQLite جديداً داخل `lab/imports/`، ثم حلل كل اللقطات المتراكمة من السجل:
 
 ```sh
 python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
   --database lab/imports/platform-metrics-ledger.sqlite3
-python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv
+python3 tools/analyze_platform_metrics.py --ledger lab/imports/platform-metrics-ledger.sqlite3
 ```
 
-إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. الأداة لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
+إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. `--ledger` يحلل كل اللقطات المستوردة ويتحقق من بصماتها. الأدوات لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
 
 ## الحركة والمراجعة
 

@@ -5,9 +5,14 @@ from __future__ import annotations
 import csv
 from concurrent.futures import ThreadPoolExecutor
 import importlib.util
+import json
 from pathlib import Path
 import sqlite3
+import subprocess
+import sys
 from tempfile import TemporaryDirectory
+
+from analyze_platform_metrics import compare, load_ledger_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "lab" / "evidence"
@@ -47,6 +52,18 @@ def main() -> None:
         assert first["ledger_row_count"] == 26 and first["source_data_origin"] == "TEST_ONLY"
         assert second["inserted_rows"] == 0 and second["duplicate_rows"] == 26
         assert second["ledger_row_count"] == 26
+        ledger_rows = load_ledger_rows(database)
+        analysis = compare(ledger_rows)
+        assert len(ledger_rows) == 26 and analysis["mode"] == "TEST_ONLY_SYNTHETIC"
+        assert analysis["publish_allowed"] is False
+        cli = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "analyze_platform_metrics.py"),
+             "--ledger", str(database)],
+            cwd=ROOT, text=True, capture_output=True, check=True,
+        )
+        cli_result = json.loads(cli.stdout)
+        assert cli_result["mode"] == "TEST_ONLY_SYNTHETIC"
+        assert cli_result["export_allowed"] is False and cli_result["publish_allowed"] is False
 
         equivalent_time = [dict(row) for row in original]
         equivalent_time[0]["observed_at"] = "2026-11-01T15:00:00+03:00"
@@ -63,6 +80,17 @@ def main() -> None:
         assert sum(result["inserted_rows"] for result in concurrent_results) == 26
         assert sum(result["duplicate_rows"] for result in concurrent_results) == 26
         assert all(result["ledger_row_count"] == 26 for result in concurrent_results)
+
+        tampered_database = temp / "tampered.sqlite3"
+        IMPORTER.import_csv(FIXTURE, tampered_database)
+        with sqlite3.connect(tampered_database) as connection:
+            connection.execute("UPDATE metric_snapshots SET content_sha256='invalid'")
+        try:
+            load_ledger_rows(tampered_database)
+        except ValueError as exc:
+            assert "integrity check" in str(exc)
+        else:
+            raise AssertionError("tampered metrics ledger was accepted")
 
         conflicting = [dict(row) for row in original]
         extra = dict(conflicting[0], post_id="new-post-rollback", topic_id="new-topic")

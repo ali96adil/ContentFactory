@@ -7,6 +7,8 @@ import argparse
 import csv
 import json
 import math
+import hashlib
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 from statistics import median
@@ -18,6 +20,9 @@ FIELDS = {
     "rights_status", "quality_status", "external_cost_usd", "data_origin",
 }
 PLATFORMS = {"youtube", "tiktok", "instagram", "facebook"}
+ROOT = Path(__file__).resolve().parents[1]
+ALLOWED_LEDGER_ROOTS = (ROOT / "lab" / "imports", ROOT / "lab" / "evidence")
+LEDGER_SCHEMA_VERSION = "1"
 
 
 def number(row: dict[str, str], field: str) -> float:
@@ -76,6 +81,47 @@ def load_rows(path: Path) -> list[dict[str, str]]:
         for field in ("age_hours", "impressions", "views", "avg_watch_seconds",
                       "duration_seconds", "saves", "shares", "external_cost_usd"):
             number(row, field)
+    return rows
+
+
+def load_ledger_rows(path: Path) -> list[dict[str, str]]:
+    if path.is_symlink():
+        raise ValueError("ledger must not be a symbolic link")
+    resolved = path.resolve()
+    if not any(resolved.is_relative_to(root.resolve()) for root in ALLOWED_LEDGER_ROOTS):
+        raise ValueError("ledger must be under lab/imports/ or lab/evidence/")
+    if not resolved.is_file():
+        raise FileNotFoundError(f"metrics ledger not found: {resolved}")
+    try:
+        with sqlite3.connect(resolved.as_uri() + "?mode=ro", uri=True) as connection:
+            version = connection.execute(
+                "SELECT value FROM ledger_meta WHERE name='schema_version'"
+            ).fetchone()
+            if version is None or version[0] != LEDGER_SCHEMA_VERSION:
+                raise ValueError("unsupported or missing metrics ledger schema version")
+            records = connection.execute(
+                "SELECT row_key,content_sha256,row_json FROM metric_snapshots ORDER BY row_key"
+            ).fetchall()
+    except sqlite3.Error as exc:
+        raise ValueError(f"cannot read metrics ledger: {exc}") from exc
+
+    rows: list[dict[str, str]] = []
+    for row_key, expected_digest, row_json in records:
+        if not all(isinstance(value, str) for value in (row_key, expected_digest, row_json)):
+            raise ValueError("metrics ledger contains invalid row types")
+        digest = hashlib.sha256(row_json.encode("utf-8")).hexdigest()
+        if digest != expected_digest:
+            raise ValueError("metrics ledger row integrity check failed")
+        row = json.loads(row_json)
+        if not isinstance(row, dict) or set(row) != FIELDS or any(not isinstance(value, str) for value in row.values()):
+            raise ValueError("metrics ledger row does not match the current CSV contract")
+        identity = json.dumps(
+            [row[field] for field in ("platform", "account_id", "post_id", "observed_at")],
+            ensure_ascii=False, separators=(",", ":"),
+        )
+        if hashlib.sha256(identity.encode("utf-8")).hexdigest() != row_key:
+            raise ValueError("metrics ledger identity check failed")
+        rows.append(row)
     return rows
 
 
@@ -186,11 +232,14 @@ def compare(rows: list[dict[str, str]]) -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("input", type=Path, help="local CSV export; no network access is used")
+    parser.add_argument("input", type=Path, nargs="?", help="local CSV export; no network access is used")
+    parser.add_argument("--ledger", type=Path, help="read previously imported local snapshots from SQLite")
     parser.add_argument("--output", type=Path, help="write JSON here instead of stdout")
     args = parser.parse_args()
+    if (args.input is None) == (args.ledger is None):
+        parser.error("provide exactly one of an input CSV or --ledger")
     try:
-        result = compare(load_rows(args.input))
+        result = compare(load_ledger_rows(args.ledger) if args.ledger else load_rows(args.input))
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
