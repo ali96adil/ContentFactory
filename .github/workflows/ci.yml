@@ -38,17 +38,5 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends ffmpeg libsqlite3-0 librsvg2-bin
 
-      - name: Run Python checks
-        run: |
-          python lab/test_checkpoint.py
-          python tools/test_analyze_platform_metrics.py
-          python tools/test_content_package_pipeline.py
-          python tools/test_content_package_recovery.py --run-name content-package-recovery-ci-TEST_ONLY
-          python -m py_compile tools/analyze_platform_metrics.py tools/test_analyze_platform_metrics.py tools/render_content_package.py tools/review_content_package_render.py tools/test_content_package_pipeline.py tools/test_content_package_recovery.py
-          node --check lab/motion.mjs
-
-      - name: Build Motion Canvas
-        working-directory: lab/motion-canvas
-        run: |
-          npm ci --legacy-peer-deps
-          npm run build
+      - name: Run complete repository verification
+        run: python tools/verify_repo.py

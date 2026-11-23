@@ -418,3 +418,10 @@ ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate,nb_fr
 - الفحوص المحلية بعد دفعة التحقق: `python3 tools/test_analyze_platform_metrics.py` PASS (5/5)، تشغيل CLI على fixture تحقق من `TEST_ONLY_SYNTHETIC` ومنع النشر وكل التوصيات `test_only_no_action` PASS، `python3 -m py_compile tools/analyze_platform_metrics.py tools/test_analyze_platform_metrics.py` PASS، و`git diff --check` PASS. لم تصل هذه الدفعة الأخيرة إلى GitHub بعد.
 - الملفات المتغيرة في الدفعة التالية: `tools/analyze_platform_metrics.py`, `tools/test_analyze_platform_metrics.py`, و`HANDOFF.md`. لا بيانات أو أسرار أو اتصال منصات أو نشر. PR #1 يبقى Draft وبلا دمج.
 - الخطوة التالية: ارفع دفعة التحقق إلى نفس فرع PR #1، وتأكد من نجاح CI على الرأس الجديد. بعد ذلك راجع تغطية المستودع المتبقية وواصل مهمة محلية قابلة للإثبات؛ اترك الحركة والصوت والحقوق وبيانات الأداء الحقيقية كبوابات تحتاج المدخلات/المراجعة المناسبة.
+
+## استئناف 2026-11-24: أمر تحقق موحد قبل جولة التأهيل
+
+- أضفت `tools/verify_repo.py` كمدخل واحد لتشغيل checkpoint، واختبارات محلل المقاييس والحزمة والاستعادة، و`py_compile` و`node --check`، ثم `npm ci --legacy-peer-deps` وبناء Motion Canvas. يفحص الأدوات المطلوبة مسبقاً، وينشئ اسماً زمنياً فريداً لأدلة الاستعادة لتفادي الكتابة فوق تجربة سابقة.
+- حدّثت CI ليشغّل الأمر نفسه داخل حاوية Ubuntu بعد تثبيت FFmpeg وSQLite وlibrsvg، وحدّثت README بأمر التحقق الكامل. الهدف توحيد الفحص المحلي مع CI على أجهزة التطوير.
+- الفحص المحلي حتى الآن: `python3 -m py_compile tools/verify_repo.py` PASS، و`git diff --check` PASS. محاولة `python3 tools/verify_repo.py` توقفت قبل الاختبارات بسبب غياب `rsvg-convert` في بيئة التنفيذ الحالية؛ لم أستخدم `sudo` أو أثبت حزم النظام. سيتم تشغيل التحقق الكامل على GitHub Actions حيث يثبت الـworkflow `librsvg2-bin` داخل الحاوية المؤقتة.
+- لم تُرفع هذه الدفعة بعد. بعد دفعها سننتظر CI على الرأس نفسه، وإذا نجح يكون فحص القبول البرمجي الموحد مكتملاً لهذه الجولة. لا يشمل ذلك اعتماداً بشرياً للحركة/الصوت/الحقوق أو تحققاً ببيانات منصات حقيقية.

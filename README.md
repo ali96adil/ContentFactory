@@ -41,16 +41,15 @@ rsvg-convert --version
 
 لا يحتاج الرندر المحلي ملف `.env` أو حساب منصة. لا تحفظ مفاتيح أو كلمات مرور في الملفات. لا تثبّت أو تشغّل n8n لإجراء الاختبارات الحالية.
 
-## الفحوص الأساسية
+## فحص المستودع الكامل
 
 شغّل من جذر المستودع:
 
 ```sh
-python3 lab/test_checkpoint.py
-python3 tools/test_content_package_pipeline.py
-python3 -m py_compile tools/render_content_package.py tools/review_content_package_render.py tools/test_content_package_pipeline.py tools/test_content_package_recovery.py
-node --check lab/motion.mjs
+python3 tools/verify_repo.py
 ```
+
+يفحص الأمر توفر FFmpeg/FFprobe وlibrsvg وNode/npm، ثم يشغّل اختبارات checkpoint ومحلل الأداء والحزمة والاستعادة، وفحوص Python/Node، وتثبيت Motion Canvas وبناءه. ينشئ مجلد أدلة `TEST_ONLY` باسم جديد لكل استعادة حتى لا يستبدل نتيجة قديمة. GitHub Actions يستعمل أمر التحقق نفسه داخل حاوية Ubuntu مؤقتة؛ بذلك تكون خطوة CI المحلية وCI موحّدة.
 
 Motion Canvas اختياري. لاستخدام المحرر، من جذر المستودع اختر Node عبر `nvm use` ثم:
 
