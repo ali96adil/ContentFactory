@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: lab/motion-canvas/package-lock.json
+
+      - name: Install media tools for TEST_ONLY integration checks
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends ffmpeg librsvg2-bin
+
+      - name: Run Python checks
+        run: |
+          python lab/test_checkpoint.py
+          python tools/test_content_package_pipeline.py
+          python tools/test_content_package_recovery.py --run-name content-package-recovery-ci-TEST_ONLY
+          python -m py_compile tools/render_content_package.py tools/review_content_package_render.py tools/test_content_package_pipeline.py tools/test_content_package_recovery.py
+          node --check lab/motion.mjs
+
+      - name: Build Motion Canvas
+        working-directory: lab/motion-canvas
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build

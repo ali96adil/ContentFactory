@@ -56,12 +56,12 @@ Motion Canvas اختياري. لاستخدام المحرر، من جذر الم
 
 ```sh
 cd lab/motion-canvas
-npm ci
+npm ci --legacy-peer-deps
 npm run build
 npm run start -- --host 127.0.0.1 --port 9000
 ```
 
-أوقفه بـ`Ctrl+C`. تثبيت `npm ci` يخص Motion Canvas فقط؛ الرندر القياسي لا يحتاج حزم npm.
+يحتاج التثبيت حالياً إلى `--legacy-peer-deps` لأن إضافة Motion Canvas `3.17.2` تعلن توافق Vite حتى الإصدار 5، بينما المشروع يختبر Vite 7. نجاح البناء يتحقق فعلياً في CI؛ لا يعني هذا أن نطاق peer المعلن صار متوافقاً. أوقف المحرر بـ`Ctrl+C`. تثبيت npm يخص Motion Canvas فقط؛ الرندر القياسي لا يحتاج حزم npm. فحوص GitHub Actions تعمل على runner قياسي عام، وتثبت أدوات الوسائط داخل بيئة CI المعزولة.
 
 ## رندر حزمة TEST_ONLY
 
