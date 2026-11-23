@@ -88,6 +88,16 @@ python3 tools/test_content_package_recovery.py \
 - `lab/evidence/`: الفيديوهات والصور والتقارير وبيانات التشغيل المحلية؛ مستثناة من Git لأنها قد تكون كبيرة أو شخصية.
 - `HANDOFF.md`: سجل البيئة والنتائج والخطوة التالية. راجع أيضاً `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
 
+لاستيراد CSV أداء مصرح به إلى سجل محلي idempotent، استخدم ملف SQLite جديداً داخل `lab/imports/`، ثم شغّل المحلل على CSV مباشرة:
+
+```sh
+python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
+  --database lab/imports/platform-metrics-ledger.sqlite3
+python3 tools/analyze_platform_metrics.py lab/imports/platform-metrics-24h.csv
+```
+
+إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. الأداة لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
+
 ## الحركة والمراجعة
 
 `Spotlight v3` مرفوض. اتجاهات `fieldnotes` و`typeplay` و`gallery` محفوظة كاختبارات محلية؛ تفاصيل اختيار الحركة في `docs/MOTION_CONTENT_SELECTION_TEST_ONLY.md`. تقرير حدود المشهد والانتقالات في `docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md`. المعاينات في `lab/evidence/motion-content-selection-TEST_ONLY/` محلية ومستثناة من Git؛ تقييم السلاسة والذوق وقراءة الهاتف ما زال بانتظار مراجعة المستخدم.

@@ -26,11 +26,13 @@ def main() -> int:
     commands = [
         ([sys.executable, "lab/test_checkpoint.py"], ROOT),
         ([sys.executable, "tools/test_analyze_platform_metrics.py"], ROOT),
+        ([sys.executable, "tools/test_import_platform_metrics.py"], ROOT),
         ([sys.executable, "tools/test_content_package_pipeline.py"], ROOT),
         ([sys.executable, "tools/test_review_content_package_render.py"], ROOT),
         ([sys.executable, "tools/test_content_package_recovery.py", "--run-name", run_name], ROOT),
         ([sys.executable, "-m", "py_compile",
           "tools/analyze_platform_metrics.py", "tools/test_analyze_platform_metrics.py",
+          "tools/import_platform_metrics.py", "tools/test_import_platform_metrics.py",
           "tools/render_content_package.py", "tools/review_content_package_render.py",
           "tools/test_review_content_package_render.py",
           "tools/test_content_package_pipeline.py", "tools/test_content_package_recovery.py",
