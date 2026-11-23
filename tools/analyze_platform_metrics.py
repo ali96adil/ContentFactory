@@ -47,18 +47,32 @@ def rate(row: dict[str, str]) -> dict[str, float] | None:
 def load_rows(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as stream:
         reader = csv.DictReader(stream)
-        missing = FIELDS - set(reader.fieldnames or [])
+        headers = reader.fieldnames or []
+        if len(headers) != len(set(headers)):
+            raise ValueError("CSV contains duplicate column names")
+        missing = FIELDS - set(headers)
         if missing:
             raise ValueError(f"CSV is missing columns: {', '.join(sorted(missing))}")
         rows = list(reader)
     for index, row in enumerate(rows, start=2):
+        if None in row:
+            raise ValueError(f"row {index}: contains more values than the CSV header")
+        if any(value is None for value in row.values()):
+            raise ValueError(f"row {index}: has fewer values than the CSV header")
         row["platform"] = row["platform"].strip().lower()
         row["role"] = row["role"].strip().lower()
         if row["platform"] not in PLATFORMS:
             raise ValueError(f"row {index}: unsupported platform {row['platform']!r}")
         if row["role"] not in {"baseline", "candidate"}:
             raise ValueError(f"row {index}: role must be baseline or candidate")
-        datetime.fromisoformat(row["observed_at"].replace("Z", "+00:00"))
+        origin = row["data_origin"].strip().lower()
+        is_synthetic = "synthetic" in origin or "test_only" in origin
+        if not is_synthetic and origin not in {"manual_export", "manual_entry"}:
+            raise ValueError(f"row {index}: data_origin must be manual_export, manual_entry, or TEST_ONLY")
+        try:
+            datetime.fromisoformat(row["observed_at"].replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError(f"row {index}: observed_at must be an ISO 8601 date/time") from exc
         for field in ("age_hours", "impressions", "views", "avg_watch_seconds",
                       "duration_seconds", "saves", "shares", "external_cost_usd"):
             number(row, field)
