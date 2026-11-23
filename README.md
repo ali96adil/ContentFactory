@@ -94,9 +94,15 @@ python3 tools/test_content_package_recovery.py \
 python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
   --database lab/imports/platform-metrics-ledger.sqlite3
 python3 tools/analyze_platform_metrics.py --ledger lab/imports/platform-metrics-ledger.sqlite3
+python3 tools/backup_platform_metrics_ledger.py backup \
+  lab/imports/platform-metrics-ledger.sqlite3 \
+  --destination lab/evidence/platform-metrics-ledger-backup-01.sqlite3
+python3 tools/backup_platform_metrics_ledger.py restore \
+  lab/evidence/platform-metrics-ledger-backup-01.sqlite3 \
+  --destination lab/imports/platform-metrics-ledger-restored.sqlite3
 ```
 
-إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. `--ledger` يحلل كل اللقطات المستوردة ويتحقق من بصماتها. الأدوات لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
+إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. `--ledger` يحلل كل اللقطات المستوردة ويتحقق من بصماتها. أداة النسخ تستعمل SQLite online backup، تتحقق من صفوفه قبل تثبيته، ولا تستبدل وجهة موجودة. الأدوات لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
 
 ## الحركة والمراجعة
 

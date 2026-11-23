@@ -66,4 +66,15 @@ python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
 python3 tools/analyze_platform_metrics.py --ledger lab/imports/platform-metrics-ledger.sqlite3
 ```
 
-قبول الجودة والحقوق والمراجعة البشرية يظل شرطاً منفصلاً. احتفظ بقاعدة SQLite محلياً خارج Git.
+لإنشاء نسخة والتحقق من استعادتها إلى ملف جديد:
+
+```sh
+python3 tools/backup_platform_metrics_ledger.py backup \
+  lab/imports/platform-metrics-ledger.sqlite3 \
+  --destination lab/evidence/platform-metrics-ledger-backup-01.sqlite3
+python3 tools/backup_platform_metrics_ledger.py restore \
+  lab/evidence/platform-metrics-ledger-backup-01.sqlite3 \
+  --destination lab/imports/platform-metrics-ledger-restored.sqlite3
+```
+
+النسخ يستخدم SQLite online backup، يتحقق من بصمات السجل، ولا يكتب فوق ملف موجود. احتفظ بقاعدة SQLite والنسخ محلياً خارج Git؛ قبول الجودة والحقوق والمراجعة البشرية يظل شرطاً منفصلاً.
