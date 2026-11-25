@@ -85,15 +85,25 @@ def validate_package(pkg: object, input_path: Path, selected_platform: str, prev
     for i, source in enumerate(sources):
         if not isinstance(source, dict):
             raise PackageError(f"sources[{i}] must be an object")
-        source_ids.add(require_string(source.get("source_id"), f"sources[{i}].source_id"))
+        source_id = require_string(source.get("source_id"), f"sources[{i}].source_id")
+        if source_id in source_ids:
+            raise PackageError(f"sources[{i}].source_id must be unique")
+        source_ids.add(source_id)
         require_string(source.get("url"), f"sources[{i}].url")
+    claim_ids = set()
     for i, claim in enumerate(claims):
         if not isinstance(claim, dict):
             raise PackageError(f"fact_base.claims[{i}] must be an object")
+        claim_id = require_string(claim.get("claim_id"), f"fact_base.claims[{i}].claim_id")
+        if claim_id in claim_ids:
+            raise PackageError(f"fact_base.claims[{i}].claim_id must be unique")
+        claim_ids.add(claim_id)
         if claim.get("review_status") != "approved":
             raise PackageError(f"fact_base.claims[{i}] lacks approved fact review")
         references = claim.get("source_ids")
-        if not isinstance(references, list) or not references or not set(references).issubset(source_ids):
+        if (not isinstance(references, list) or not references
+                or any(not isinstance(ref, str) or not ref.strip() for ref in references)
+                or not set(references).issubset(source_ids)):
             raise PackageError(f"fact_base.claims[{i}] must reference existing sources")
     for i, asset in enumerate(assets):
         if not isinstance(asset, dict):
