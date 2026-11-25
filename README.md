@@ -104,6 +104,10 @@ python3 tools/backup_platform_metrics_ledger.py restore \
 
 إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. `--ledger` يحلل كل اللقطات المستوردة ويتحقق من بصماتها. أداة النسخ تستعمل SQLite online backup، تتحقق من صفوفه قبل تثبيته، ولا تستبدل وجهة موجودة. الأدوات لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
 
+## سجل المهام المحلي
+
+يوفر `tools/job_ledger.py` نموذجاً محلياً ذرياً لحالات العمل وleases حتى `review_required`. يستخدم SQLite تحت `lab/imports/` أو `lab/evidence/` فقط، ويرفض أي وجهة غير `local`. لا يفتح API، ولا يمنح موافقة بشرية، ولا يصدر أو ينشر. اختباره ضمن `python3 tools/verify_repo.py`؛ تفاصيل الحدود في [`LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md).
+
 ## الحركة والمراجعة
 
 `Spotlight v3` مرفوض. اتجاهات `fieldnotes` و`typeplay` و`gallery` محفوظة كاختبارات محلية؛ تفاصيل اختيار الحركة في `docs/MOTION_CONTENT_SELECTION_TEST_ONLY.md`. تقرير حدود المشهد والانتقالات في `docs/MOTION_VISUAL_SYSTEM_REVIEW_V9_TEST_ONLY.md`. المعاينات في `lab/evidence/motion-content-selection-TEST_ONLY/` محلية ومستثناة من Git؛ تقييم السلاسة والذوق وقراءة الهاتف ما زال بانتظار مراجعة المستخدم.

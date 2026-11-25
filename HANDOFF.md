@@ -1,5 +1,15 @@
 # تسليم واستئناف مصنع المحتوى
 
+## استئناف 2026-11-25: سجل مهام محلي بعقود leases
+
+- المراجعة بعد CI وجدت أن `lab/checkpoint.py` يختبر إعادة المحاولة فقط ولا يحقق حجز العامل/heartbeat/منع العامل المتأخر الموصوف بالعقد. استخدمت هذا harness لتحديد الحد، ثم أضفت `tools/job_ledger.py` كطبقة SQLite محلية مستقلة دون API أو ربط n8n/Pi. يسجل الهوية المركبة idempotently، و`queued/running/retry_wait/review_required/blocked/failed/cancelled`، مع lease عشوائي وheartbeat وfencing واكتمال idempotent/backoff وسقف ثلاث محاولات.
+- الوجهة `local` فقط، قاعدة البيانات لا تُقبل إلا في `lab/imports/` أو `lab/evidence/` وبامتداد `.sqlite3` وبدون symlink، ومسارات المخرج POSIX نسبية؛ هذه الحدود تمنع توجيه النموذج إلى تخزين متعقب أو وجهة نشر. لم أضف حالة قبول بشري أو `exported` لأن السجل لا يملك هوية/موافقة حقيقية ولا ينفذ تسليماً.
+- `tools/test_job_ledger.py`: عشر حالات للواردات المتزامنة، مطالبات متزامنة، backoff والسقف، انتهاء/استبدال lease، heartbeat، fencing، completion idempotency، الحجب والإلغاء، والمخطط والمسارات والمدخلات المشوهة. أول تشغيل كشف عدم تطابق نص رسالة رفض symlink مع التوقع؛ حسّنت رسالة الخطأ وأعدت الاختبار، ثم وسعت فحص الأنواع والمسارات، وآخر تشغيل `10/10 PASS`. `py_compile` و`git diff --check` PASS.
+- حدّثت README و`docs/LOCAL_WORKFLOW_NEXT_STEP.md` لتوضيح ما ينجزه السجل وما لا يفعله، وأضفت الاختبار إلى `tools/verify_repo.py`. ما زالت مراجعة/اعتماد المحتوى وواجهة/API والعامل الحقيقي والربط مع Pi/n8n خارج التنفيذ المحلي الآمن.
+- الفحص الكامل النهائي: `python3 tools/verify_repo.py` — `Repository verification: PASS`؛ شمل 10 حالات سجل جديدة، اختبار تقييم الوسائط، الرندر والاستعادة (31 ملفاً وبصمات SHA-256 متطابقة) في `lab/evidence/content-package-recovery-20261125T203952Z-TEST_ONLY/`، فحوص Python/Node، `npm ci --legacy-peer-deps` وصفر ثغرات مُعلنة، وبناء Motion Canvas 847 وحدة. الجودة البشرية بقيت `PENDING_USER_REVIEW`.
+- أول تشغيل لـ`python3 tools/test_job_ledger.py` كشف أن رسالة رفض symlink لم تطابق الوصف المحدد بالاختبار؛ لم يكن هناك قبول للملف. عدّلت صياغة الرسالة، ثم شغّلت الاختبار المركّز 9/9 PASS وأعدت التحقق الكامل أعلاه بنجاح.
+- الرأس البعيد قبل هذه الدفعة `e5751eb6984f9c8df969a0c0e9b24c3dce299757`؛ CI كان PASS عليه في run `45695312990`. الخطوة التالية: افحص staged diff والأسرار، اعمل commit/push عادي، انتظر CI على الرأس الجديد، ثم حدّث PR #1 بنتيجة CI المحلية/البعيدة مع إبقائه Draft.
+
 ## استئناف 2026-11-25: مزامنة الفرع وفحص شامل وإصلاح أداة التقييم
 
 - فحص البداية: macOS 27.0 / arm64؛ Python `3.15.2`، Node `24.21.0`، npm `11.19.0`، Git `2.55.0`، FFmpeg/FFprobe `7.1.1`، `rsvg-convert 2.63.4`، ومساحة حرة `153 GiB`. كل أدوات الوسائط المطلوبة موجودة، لذلك ما احتجت تثبيتاً أو `sudo`.
