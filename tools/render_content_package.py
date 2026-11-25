@@ -119,17 +119,25 @@ def validate_package(pkg: object, input_path: Path, selected_platform: str, prev
                 or any(not isinstance(ref, str) or not ref.strip() for ref in references)
                 or not set(references).issubset(source_ids)):
             raise PackageError(f"fact_base.claims[{i}] must reference existing sources")
+    asset_ids = set()
     for i, asset in enumerate(assets):
         if not isinstance(asset, dict):
             raise PackageError(f"assets[{i}] must be an object")
+        asset_id = require_string(asset.get("asset_id"), f"assets[{i}].asset_id")
+        if asset_id in asset_ids:
+            raise PackageError(f"assets[{i}].asset_id must be unique")
+        asset_ids.add(asset_id)
         if asset.get("rights_status") != "verified":
             raise PackageError(f"assets[{i}] lacks verified rights")
         for key in ("source_url", "license_name", "license_url", "sha256", "path"):
             require_string(asset.get(key), f"assets[{i}].{key}")
+        if (len(asset["sha256"]) != 64
+                or any(char not in "0123456789abcdefABCDEF" for char in asset["sha256"])):
+            raise PackageError(f"assets[{i}].sha256 must be a 64-character hexadecimal SHA-256 digest")
         asset_path = (ROOT / asset["path"]).resolve()
         if not asset_path.is_relative_to(LAB.resolve()) or not asset_path.is_file():
             raise PackageError(f"assets[{i}].path must be an existing local file under lab/")
-        if sha256(asset_path) != asset["sha256"]:
+        if sha256(asset_path) != asset["sha256"].lower():
             raise PackageError(f"assets[{i}].sha256 does not match the local file")
 
     copy = pkg.get("copy")

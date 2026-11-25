@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -35,6 +36,16 @@ def valid_claim(**overrides: object) -> dict[str, object]:
     }
     claim.update(overrides)
     return claim
+
+
+def valid_asset(asset_id: str) -> dict[str, object]:
+    path = ROOT / "lab" / "fixtures" / "content-package-demo-TEST_ONLY.json"
+    return {
+        "asset_id": asset_id, "kind": "reference", "rights_status": "verified",
+        "source_url": "https://example.test/source", "license_name": "Example",
+        "license_url": "https://example.test/license", "path": "lab/fixtures/content-package-demo-TEST_ONLY.json",
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
 
 
 def main() -> None:
@@ -73,7 +84,21 @@ def main() -> None:
         valid_claim(reviewed_at_utc="2026-11-25T15:00:00+03:00")
     ]
     expect_rejected(non_utc_review, "must use UTC")
-    print("PASS: duplicate references, missing review metadata, malformed references, and non-UTC review times reject")
+
+    duplicate_assets = copy.deepcopy(base)
+    duplicate_assets["assets"] = [valid_asset("same"), valid_asset("same")]
+    expect_rejected(duplicate_assets, "asset_id must be unique")
+
+    malformed_asset_digest = copy.deepcopy(base)
+    malformed_asset_digest["assets"] = [valid_asset("asset-1") | {"sha256": "not-a-digest"}]
+    expect_rejected(malformed_asset_digest, "64-character hexadecimal SHA-256")
+
+    uppercase_digest = copy.deepcopy(base)
+    uppercase_asset = valid_asset("asset-upper")
+    uppercase_asset["sha256"] = str(uppercase_asset["sha256"]).upper()
+    uppercase_digest["assets"] = [uppercase_asset]
+    RENDER.validate_package(uppercase_digest, FIXTURE, "all", 1)
+    print("PASS: unique IDs, required review metadata, valid source references, and asset checksum validation")
 
 
 if __name__ == "__main__":
