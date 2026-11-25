@@ -100,6 +100,20 @@ def validate_package(pkg: object, input_path: Path, selected_platform: str, prev
         claim_ids.add(claim_id)
         if claim.get("review_status") != "approved":
             raise PackageError(f"fact_base.claims[{i}] lacks approved fact review")
+        for key in ("text_ar_white", "text_en", "claim_type", "reviewer_alias"):
+            require_string(claim.get(key), f"fact_base.claims[{i}].{key}")
+        reviewed_at = require_string(claim.get("reviewed_at_utc"),
+                                     f"fact_base.claims[{i}].reviewed_at_utc")
+        try:
+            parsed_reviewed_at = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise PackageError(
+                f"fact_base.claims[{i}].reviewed_at_utc must be a UTC ISO-8601 timestamp"
+            ) from exc
+        if parsed_reviewed_at.utcoffset() != timezone.utc.utcoffset(parsed_reviewed_at):
+            raise PackageError(
+                f"fact_base.claims[{i}].reviewed_at_utc must use UTC"
+            )
         references = claim.get("source_ids")
         if (not isinstance(references, list) or not references
                 or any(not isinstance(ref, str) or not ref.strip() for ref in references)

@@ -26,6 +26,17 @@ def expect_rejected(package: dict[str, object], message: str) -> None:
         raise AssertionError(f"invalid package was accepted: {message}")
 
 
+def valid_claim(**overrides: object) -> dict[str, object]:
+    claim: dict[str, object] = {
+        "claim_id": "c1", "text_ar_white": "حقيقة", "text_en": "Fact",
+        "claim_type": "general", "review_status": "approved",
+        "reviewer_alias": "reviewer-1", "reviewed_at_utc": "2026-11-25T12:00:00Z",
+        "source_ids": ["s1"], "notes": "",
+    }
+    claim.update(overrides)
+    return claim
+
+
 def main() -> None:
     base = json.loads(FIXTURE.read_text(encoding="utf-8"))
     duplicate_sources = copy.deepcopy(base)
@@ -37,24 +48,32 @@ def main() -> None:
 
     missing_claim_id = copy.deepcopy(base)
     missing_claim_id["sources"] = [{"source_id": "s1", "url": "https://example.test/a"}]
-    missing_claim_id["fact_base"]["claims"] = [{
-        "review_status": "approved", "source_ids": ["s1"]
-    }]
+    missing_claim_id["fact_base"]["claims"] = [valid_claim(claim_id="")]
     expect_rejected(missing_claim_id, "claim_id")
 
     malformed_reference = copy.deepcopy(base)
     malformed_reference["sources"] = [{"source_id": "s1", "url": "https://example.test/a"}]
-    malformed_reference["fact_base"]["claims"] = [{
-        "claim_id": "c1", "review_status": "approved", "source_ids": [{"id": "s1"}]
-    }]
+    malformed_reference["fact_base"]["claims"] = [valid_claim(source_ids=[{"id": "s1"}])]
     expect_rejected(malformed_reference, "must reference existing sources")
 
     duplicate_claims = copy.deepcopy(base)
     duplicate_claims["sources"] = [{"source_id": "s1", "url": "https://example.test/a"}]
-    claim = {"claim_id": "c1", "review_status": "approved", "source_ids": ["s1"]}
+    claim = valid_claim()
     duplicate_claims["fact_base"]["claims"] = [claim, copy.deepcopy(claim)]
     expect_rejected(duplicate_claims, "claim_id must be unique")
-    print("PASS: duplicate source/claim IDs, missing claim IDs, and malformed references reject")
+
+    missing_reviewer = copy.deepcopy(base)
+    missing_reviewer["sources"] = [{"source_id": "s1", "url": "https://example.test/a"}]
+    missing_reviewer["fact_base"]["claims"] = [valid_claim(reviewer_alias="")]
+    expect_rejected(missing_reviewer, "reviewer_alias")
+
+    non_utc_review = copy.deepcopy(base)
+    non_utc_review["sources"] = [{"source_id": "s1", "url": "https://example.test/a"}]
+    non_utc_review["fact_base"]["claims"] = [
+        valid_claim(reviewed_at_utc="2026-11-25T15:00:00+03:00")
+    ]
+    expect_rejected(non_utc_review, "must use UTC")
+    print("PASS: duplicate references, missing review metadata, malformed references, and non-UTC review times reject")
 
 
 if __name__ == "__main__":

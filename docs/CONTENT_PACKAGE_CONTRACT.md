@@ -10,7 +10,7 @@
 ## ما داخل الحزمة
 
 1. `topic`: معرف وعنوان ثنائي اللغة، الجمهور، احتياج المشاهد، ووعد تحريري واحد.
-2. `fact_base.claims`: كل عنصر يستخدم `claim_id`, `text_ar_white`, `text_en`, `claim_type`, `source_ids`, `review_status`, `reviewer_alias`, `reviewed_at_utc`, و`notes`. سجل ادعاء ذري واربطه بمعرف مصدر. لا تنسخ فقرة المصدر؛ أعد الصياغة واربط الادعاء بالدليل.
+2. `fact_base.claims`: كل عنصر يستخدم `claim_id`, `text_ar_white`, `text_en`, `claim_type`, `source_ids`, `review_status`, `reviewer_alias`, `reviewed_at_utc`, و`notes`. يجب أن يكون `claim_id` فريداً؛ إذا كانت حالة المراجعة `approved` فتحقق من وجود المراجع ووقت ISO-8601 بوقت UTC. سجل ادعاء ذري واربطه بمعرف مصدر. لا تنسخ فقرة المصدر؛ أعد الصياغة واربط الادعاء بالدليل.
 3. `sources`: كل عنصر يستخدم `source_id`, `title`, `publisher`, `url`, `published_at`, `accessed_at_utc`, `locator`, `snapshot_path`, `sha256`, `reuse_terms_url`, و`license_name`. يجب أن يكون `source_id` فريداً لأن الادعاءات تحيل إليه. خزّن بصمة نسخة محلية عند الاحتفاظ بها، وشروط/ترخيص إعادة الاستخدام إذا ستنقل مادة. ذكر الرابط وحده لا يعني السماح بنسخ صورة/نص.
 4. `copy.ar_white` و`copy.en`: لكل لغة hook ونص فيديو قصير ونص الشاشة وcaption وCTA؛ شرائح Carousel منفصلة؛ وحلقة YouTube الطويلة بعناوين/افتتاح/أقسام/نقاط/خاتمة/وصف وفصول. الترجمة تكييف تحريري أمين، مو ترجمة آلية حرفية.
 5. `assets`: سجل لكل صورة/فيديو/موسيقى/خط/قالب/عنصر خارجي: `asset_id`, `kind`, `path`, `creator`, `source_url`, `license_name`, `license_url`, `permission_evidence`, `attribution`, `sha256`, `allowed_uses`, `review_status`. لا تضف أصلاً ما لم يكن مصدره وترخيصه/إذنه مناسبين ومثبتين. الرسم المولّد بأشكال أصلية داخل المشروع يوثق كأصل محلي ولا يخلط مع أصل خارجي.
