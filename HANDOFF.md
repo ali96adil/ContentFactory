@@ -1,5 +1,15 @@
 # تسليم واستئناف مصنع المحتوى
 
+## استئناف 2026-11-25: مزامنة الفرع وفحص شامل وإصلاح أداة التقييم
+
+- فحص البداية: macOS 27.0 / arm64؛ Python `3.15.2`، Node `24.21.0`، npm `11.19.0`، Git `2.55.0`، FFmpeg/FFprobe `7.1.1`، `rsvg-convert 2.63.4`، ومساحة حرة `153 GiB`. كل أدوات الوسائط المطلوبة موجودة، لذلك ما احتجت تثبيتاً أو `sudo`.
+- المجلد كان نظيفاً على `main` عند `d60148c08625e88d36ec357a1621ced92a670ea8`. بعد `git fetch origin --prune` أنشأت فرع التتبع المحلي `codex/public-ci-baseline` من البعيد من دون تغيير الملفات. HEAD بداية العمل طابق `origin/codex/public-ci-baseline` عند `8cb9e62fea43d4578cf5379a2ad02167e14406bc`. PR #1 مفتوح Draft وغير مدموج، وCI الأساسي `45681907478` ناجح على ذلك الرأس.
+- شغّلت `python3 tools/verify_repo.py` قبل التغيير وبعده. التشغيل الأول PASS على المستودع الكامل: حالات checkpoint، التحليل والاستيراد والنسخ، pipeline، مراجعة manifest والمراجع، استعادة/rerender ومقارنة SHA-256 لـ31 ملفاً، Python/Node، `npm ci --legacy-peer-deps` (صفر ثغرات مُعلنة)، وبناء Motion Canvas عبر TypeScript/Vite (`847` وحدة). بعد الإصلاح شغّلته مرة أخرى وكانت النتيجة النهائية أيضاً `Repository verification: PASS`؛ استخدم الاستعادة المسار `lab/evidence/content-package-recovery-20261125T202413Z-TEST_ONLY/`.
+- خلال مراجعة الأدوات وجدت أن `tools/record_media_evaluation.py` كان يكتب مسار الأصل المطلق إلى CSV الافتراضي المتعقب، وأنه يلحق بملف موجود حتى لو كان رأسه مخالفاً للمخطط. صار يسجل مساراً نسبياً داخل المستودع فقط، يحسب SHA-256 على أجزاء، ويرفض الملفات خارج المستودع، والرؤوس المخالفة والوجهات الرمزية. أضفت `tools/test_record_media_evaluation.py` وربطته بـ`tools/verify_repo.py`، وحدّثت طريقة الاستخدام في `docs/LOCAL_AUDIO_MOTION_EVALUATION.md`. السبب: منع كشف اسم/مسار المستخدم وتلف سجل التقييم؛ القرار يقصر الأصول المسجلة على المستودع لتظل الإحالة قابلة للنقل.
+- `python3 tools/test_record_media_evaluation.py` PASS. `python3 -m py_compile tools/record_media_evaluation.py tools/test_record_media_evaluation.py tools/verify_repo.py` و`git diff --check` PASS. فحص Git regex لمفاتيح شائعة لم يجد أسراراً؛ ولا ملفات `.env` أو قواعد SQLite أو أصول `TEST_ONLY` أو نماذج ضمن الملفات المتعقبة. `gitleaks` و`trufflehog` و`semgrep` و`bandit` غير مثبتة؛ لا أسجل فحصاً بها.
+- لا تغيير في سياسة الميزانية أو النشر، ولا بيانات حسابات أو محتوى حقيقي؛ n8n لم يُشغّل. بوابات الصوت/الحقوق/مراجعة الجودة البشرية/بيانات المنصات/Pi ما زالت تنتظر مدخلاتها المحددة في الأقسام أدناه.
+- الخطوة التالية لهذه الدفعة: افحص diff النهائي والملفات الحساسة، اعمل commit محلياً بعد تسجيل نتائج التحقق، ادفع push عادي إلى `codex/public-ci-baseline`، انتظر CI على HEAD الجديد، ثم حدّث وصف PR #1 مع إبقائه Draft.
+
 ## دفعة تحقق مراجع الحزمة — 2026-11-25
 
 - تحققت من GitHub: الفرع `codex/public-ci-baseline` ما زال عند `1fd7f6e6863cd25c55653b83cd77bdadeb45f233`، وPR #1 مفتوح Draft وغير مدموج. Actions run `45283100080` نجح على هذا الرأس؛ combined status endpoint لم يعرض checks منفصلة.

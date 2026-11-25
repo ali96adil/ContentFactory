@@ -112,6 +112,8 @@ ffmpeg -y -framerate 24 -i 'lab/motion-canvas/output/project/%06d.png' -c:v libx
 python3 tools/record_media_evaluation.py --kind audio --language en --candidate 'Piper 1.8.0 / en_US-ljspeech-medium' --asset lab/evidence/en-piper-ljspeech-TEST_ONLY.wav --source-url https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/ljspeech/medium --license 'Public Domain dataset; Piper engine GPL-3.0-or-later' --generation-seconds 0.982 --gender-metadata 'female (voice card)' --notes 'human listening review pending'
 ```
 
+يسجل الأمر مسار الأصل نسبياً إلى جذر المستودع حتى لا يكتب مسار المستخدم الخاص في CSV. الأصول خارج المستودع مرفوضة لهذا السبب؛ انقل نسخة اختبارية موسومة `TEST_ONLY` إلى `lab/evidence/` أولاً. إذا كان ملف النتائج موجوداً، يتحقق الأمر من تطابق رأس CSV ويرفض الإلحاق عند اختلاف المخطط أو إذا كانت الوجهة رابطاً رمزياً.
+
 ## التوصية والخطوة التالية
 
 أبقِ Motion Canvas مرشحاً للتجارب القابلة للتحرير، واحتفظ بـlibrsvg للقوالب القصيرة ذات الاحتياجات البسيطة. قبل اعتماد أي منهما، أعد بناءً نظيفاً بتوافقات إصدارات مدعومة واختبر سهولة تحريك مشهدين إضافيين.
