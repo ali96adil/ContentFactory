@@ -4,16 +4,18 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
 
-from job_ledger import JobLedger, JobLedgerError
+from job_ledger import ARTIFACT_ROOT, JobLedger, JobLedgerError
 
 
 T0 = datetime(2026, 11, 25, 12, tzinfo=timezone.utc)
 DIGEST = "a" * 64
-ARTIFACT_DIGEST = "b" * 64
+ARTIFACT_CONTENT = b"TEST_ONLY rendered artifact"
+ARTIFACT_DIGEST = hashlib.sha256(ARTIFACT_CONTENT).hexdigest()
 
 
 def sample_job(**changes: object) -> dict[str, object]:
@@ -27,11 +29,14 @@ def sample_job(**changes: object) -> dict[str, object]:
 
 
 def complete(ledger: JobLedger, job: dict[str, object], *, now: datetime = T0,
-             digest: str = ARTIFACT_DIGEST) -> dict[str, object]:
+             artifact_type: str = "short_video") -> dict[str, object]:
+    path = ledger.database.parent / "artifacts" / "short-ar-TEST_ONLY.mp4"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(ARTIFACT_CONTENT)
     return ledger.complete(
-        job["job_id"], job["lease_id"], artifact_type="short_video",
-        artifact_path="artifacts/short-ar-TEST_ONLY.mp4", artifact_sha256=digest,
-        artifact_bytes=1200, tool_version="renderer-test", qa_result="PENDING_HUMAN_REVIEW",
+        job["job_id"], job["lease_id"], artifact_type=artifact_type,
+        artifact_path=path.relative_to(ARTIFACT_ROOT).as_posix(), artifact_sha256=ARTIFACT_DIGEST,
+        artifact_bytes=len(ARTIFACT_CONTENT), tool_version="renderer-test", qa_result="PENDING_HUMAN_REVIEW",
         now=now,
     )
 
@@ -92,7 +97,7 @@ class JobLedgerTests(unittest.TestCase):
         self.assertEqual(done["status"], "review_required")
         self.assertEqual(complete(self.ledger, second, now=T0 + timedelta(seconds=17)), done)
         with self.assertRaisesRegex(JobLedgerError, "conflicts"):
-            complete(self.ledger, second, now=T0 + timedelta(seconds=17), digest="c" * 64)
+            complete(self.ledger, second, now=T0 + timedelta(seconds=17), artifact_type="different")
 
     def test_expired_final_lease_is_marked_failed(self) -> None:
         queued = self.ledger.enqueue(sample_job(), now=T0)
@@ -172,6 +177,37 @@ class JobLedgerTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(JobLedgerError, "job_id"):
             self.ledger.get([])
+
+    def test_complete_verifies_artifact_presence_size_digest_and_symlinks(self) -> None:
+        queued = self.ledger.enqueue(sample_job(), now=T0)
+        claimed = self.ledger.claim("worker", now=T0)
+        artifact_dir = self.ledger.database.parent / "artifacts"
+        artifact_dir.mkdir(parents=True)
+        artifact = artifact_dir / "real-TEST_ONLY.mp4"
+        artifact.write_bytes(ARTIFACT_CONTENT)
+        reference = artifact.relative_to(ARTIFACT_ROOT).as_posix()
+        args = dict(
+            artifact_type="short_video", artifact_path=reference,
+            artifact_sha256=ARTIFACT_DIGEST, artifact_bytes=len(ARTIFACT_CONTENT),
+            tool_version="test", now=T0,
+        )
+        with self.assertRaisesRegex(JobLedgerError, "regular file"):
+            self.ledger.complete(claimed["job_id"], claimed["lease_id"],
+                                 **{**args, "artifact_path": reference + ".missing"})
+        with self.assertRaisesRegex(JobLedgerError, "artifact_bytes"):
+            self.ledger.complete(claimed["job_id"], claimed["lease_id"],
+                                 **{**args, "artifact_bytes": len(ARTIFACT_CONTENT) + 1})
+        with self.assertRaisesRegex(JobLedgerError, "artifact_sha256"):
+            self.ledger.complete(claimed["job_id"], claimed["lease_id"],
+                                 **{**args, "artifact_sha256": "c" * 64})
+        link = artifact_dir / "linked-TEST_ONLY.mp4"
+        link.symlink_to(artifact)
+        with self.assertRaisesRegex(JobLedgerError, "symbolic links"):
+            self.ledger.complete(claimed["job_id"], claimed["lease_id"],
+                                 **{**args, "artifact_path": link.relative_to(ARTIFACT_ROOT).as_posix()})
+        done = self.ledger.complete(claimed["job_id"], claimed["lease_id"], **args)
+        self.assertEqual(done["status"], "review_required")
+        self.assertEqual(done["artifact_sha256"], ARTIFACT_DIGEST)
 
 
 if __name__ == "__main__":

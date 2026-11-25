@@ -15,6 +15,7 @@ from typing import Any, Iterator
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_DATABASE_ROOTS = (ROOT / "lab" / "imports", ROOT / "lab" / "evidence")
+ARTIFACT_ROOT = ROOT / "lab" / "evidence"
 SCHEMA_VERSION = "1"
 MAX_ATTEMPTS = 3  # One initial attempt plus two retries.
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -71,6 +72,27 @@ def _safe_artifact_path(value: str) -> str:
     if path.as_posix() != value:
         raise JobLedgerError("artifact path must be normalized")
     return value
+
+
+def _verify_artifact(path: str, expected_sha256: str, expected_bytes: int) -> None:
+    root = ARTIFACT_ROOT.resolve()
+    target = ARTIFACT_ROOT.joinpath(*PurePosixPath(path).parts)
+    cursor = ARTIFACT_ROOT
+    for part in PurePosixPath(path).parts:
+        cursor /= part
+        if cursor.is_symlink():
+            raise JobLedgerError("artifact path must not contain symbolic links")
+    resolved = target.resolve()
+    if not resolved.is_relative_to(root) or not resolved.is_file():
+        raise JobLedgerError("artifact must be a regular file under lab/evidence/")
+    if resolved.stat().st_size != expected_bytes:
+        raise JobLedgerError("artifact_bytes does not match the file")
+    digest = hashlib.sha256()
+    with resolved.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    if digest.hexdigest() != expected_sha256:
+        raise JobLedgerError("artifact_sha256 does not match the file")
 
 
 def _validate_lease_identity(job_id: str, lease_id: str) -> None:
@@ -221,6 +243,7 @@ class JobLedger:
         if not isinstance(qa_result, str) or qa_result not in {"PASS", "PENDING_HUMAN_REVIEW"}:
             raise JobLedgerError("qa_result must be PASS or PENDING_HUMAN_REVIEW")
         safe_path = _safe_artifact_path(artifact_path)
+        _verify_artifact(safe_path, artifact_sha256, artifact_bytes)
         stamp = utc_timestamp(now)
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")

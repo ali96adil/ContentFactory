@@ -1,5 +1,13 @@
 # تسليم واستئناف مصنع المحتوى
 
+## متابعة 2026-11-25: تحقق بيانات أثر المهمة
+
+- مراجعة `complete` في سجل المهام أظهرت أن النسخة السابقة كانت تحفظ `artifact_sha256` و`artifact_bytes` كما أرسلهما المستدعي من دون فحص الملف. أضفت تحققاً فعلياً لملف داخل `lab/evidence/`، ومنع الروابط الرمزية، ومطابقة الحجم وSHA-256 قبل الانتقال إلى `review_required`.
+- وسعت `tools/test_job_ledger.py` إلى 11 حالة بإضافة الملف المفقود والحجم/البصمة الخطأ والرابط الرمزي ثم الاكتمال الصحيح. `python3 tools/test_job_ledger.py` PASS (11/11)، و`python3 -m py_compile tools/job_ledger.py tools/test_job_ledger.py` و`git diff --check` PASS. الملفات المؤقتة تنشأ في مسار `TEST_ONLY` تحت `lab/evidence/` وتنظفها الاختبارات.
+- حدثت README و`docs/LOCAL_WORKFLOW_NEXT_STEP.md` لتوضيح حد التحقق. `tools/verify_repo.py` يتضمن الاختبار؛ نتيجة التشغيل الكامل بعد التغيير مسجلة أدناه.
+- أُعيد `python3 tools/verify_repo.py` كاملاً بعد هذا التغيير ونجح (`Repository verification: PASS`). فحص الاستعادة في `lab/evidence/content-package-recovery-20261125T204843Z-TEST_ONLY/` اجتاز الرندر وفك الترميز، استعاد 31 ملفاً ببصمات SHA-256 متطابقة، ومراجعة المخرجات؛ ثم نجحت فحوص Python/Node و`npm ci --legacy-peer-deps` (صفر ثغرات مُعلنة) وبناء Motion Canvas 847 وحدة. الحالة البشرية بقيت `PENDING_USER_REVIEW`.
+- الرأس البعيد الحالي قبل الإصلاح `64ff8a3eacc15489df97c5434394107319176e3b`؛ CI كان PASS عليه في run `45697815176`. الخطوة التالية: افحص staged diff والأنماط الحساسة، commit/push عادي، انتظر CI على الرأس الجديد، وحدّث PR #1 بنتيجة التحقق مع إبقائه Draft.
+
 ## إغلاق الدفعة المحلية — 2026-11-25
 
 - آخر دفعة كود `b945e65a6f8cb81992f2f3ef57ce450f75eab54f` اجتازت `python3 tools/verify_repo.py` محلياً بالكامل، ثم GitHub Actions run `45697371211` على نفس الرأس. يشمل ذلك رندر/فك ترميز/استعادة `TEST_ONLY` وبصمات 31 ملفاً وبناء Motion Canvas.

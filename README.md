@@ -106,7 +106,7 @@ python3 tools/backup_platform_metrics_ledger.py restore \
 
 ## سجل المهام المحلي
 
-يوفر `tools/job_ledger.py` نموذجاً محلياً ذرياً لحالات العمل وleases حتى `review_required`. يستخدم SQLite تحت `lab/imports/` أو `lab/evidence/` فقط، ويرفض أي وجهة غير `local`. لا يفتح API، ولا يمنح موافقة بشرية، ولا يصدر أو ينشر. اختباره ضمن `python3 tools/verify_repo.py`؛ تفاصيل الحدود في [`LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md).
+يوفر `tools/job_ledger.py` نموذجاً محلياً ذرياً لحالات العمل وleases حتى `review_required`. يستخدم SQLite تحت `lab/imports/` أو `lab/evidence/` فقط، ويرفض أي وجهة غير `local`. عند الاكتمال يتحقق من وجود الأثر الفعلي تحت `lab/evidence/` ويطابق الحجم وSHA-256 ويرفض symlinks. لا يفتح API، ولا يمنح موافقة بشرية، ولا يصدر أو ينشر. اختباره ضمن `python3 tools/verify_repo.py`؛ تفاصيل الحدود في [`LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md).
 
 ## الحركة والمراجعة
 
