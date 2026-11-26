@@ -189,6 +189,11 @@ class JobLedgerTests(unittest.TestCase):
                 artifact_sha256=ARTIFACT_DIGEST, artifact_bytes=1, tool_version="test",
                 qa_result=[], now=T0,
             )
+        with self.assertRaisesRegex(JobLedgerError, "positive integer"):
+            self.ledger.complete(
+                "job", "lease", artifact_type="short_video", artifact_path="artifacts/out.mp4",
+                artifact_sha256=ARTIFACT_DIGEST, artifact_bytes=0, tool_version="test", now=T0,
+            )
         with self.assertRaisesRegex(JobLedgerError, "relative"):
             self.ledger.complete(
                 "job", "lease", artifact_type="short_video", artifact_path=".",

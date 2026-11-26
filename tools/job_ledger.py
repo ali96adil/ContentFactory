@@ -264,8 +264,8 @@ class JobLedger:
             raise JobLedgerError("tool_version must be non-empty")
         if not isinstance(artifact_sha256, str) or not SHA256_RE.fullmatch(artifact_sha256):
             raise JobLedgerError("artifact_sha256 must be a lowercase SHA-256 digest")
-        if not isinstance(artifact_bytes, int) or isinstance(artifact_bytes, bool) or artifact_bytes < 0:
-            raise JobLedgerError("artifact_bytes must be a non-negative integer")
+        if not isinstance(artifact_bytes, int) or isinstance(artifact_bytes, bool) or artifact_bytes < 1:
+            raise JobLedgerError("artifact_bytes must be a positive integer")
         if not isinstance(qa_result, str) or qa_result not in {"PASS", "PENDING_HUMAN_REVIEW"}:
             raise JobLedgerError("qa_result must be PASS or PENDING_HUMAN_REVIEW")
         safe_path = _safe_artifact_path(artifact_path)
