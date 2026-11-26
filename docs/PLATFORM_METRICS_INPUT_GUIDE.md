@@ -50,3 +50,31 @@
 - املأ صف `candidate` للمنشور بعد مرور 24 ساعة تقريباً. املأ صفوف `baseline` الستة بمنشورات سابقة قابلة للمقارنة من الحساب نفسه.
 - لا تحذف عنوان عمود، ولا تضف عموداً، ولا تدمج خليتي المنصة/الحساب. خَلِّ كل صف لمنشور واحد، واحفظ بصيغة CSV مفصولة بفواصل.
 - لا تشغّل `tools/analyze_platform_metrics.py` على القالب الفارغ. لا تشغّله لاحقاً إذا بقيت خلايا رقمية مطلوبة فارغة، أو إذا استخدمت `TEST_ONLY`/بيانات اصطناعية.
+
+## سجل الاستيراد المحلي
+
+بعد توفر CSV من حساب مصرّح به، احتفظ بنسخته المنقحة داخل `lab/imports/`، ثم أضف الصفوف إلى سجل SQLite المحلي:
+
+```sh
+python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
+  --database lab/imports/platform-metrics-ledger.sqlite3
+```
+
+السجل idempotent على مفتاح المنصة والحساب المستعار والمنشور ووقت القياس UTC. إعادة اللقطة المطابقة لا تكررها؛ اختلاف حقول اللقطة نفسها يرفض كامل الدفعة ويترك السجل السابق كما هو. المسار لا يتصل بالمنصة، ولا يقرر اعتماداً أو توسعاً أو تصديراً/نشراً. حلل كل اللقطات المسجلة عبر:
+
+```sh
+python3 tools/analyze_platform_metrics.py --ledger lab/imports/platform-metrics-ledger.sqlite3
+```
+
+لإنشاء نسخة والتحقق من استعادتها إلى ملف جديد:
+
+```sh
+python3 tools/backup_platform_metrics_ledger.py backup \
+  lab/imports/platform-metrics-ledger.sqlite3 \
+  --destination lab/evidence/platform-metrics-ledger-backup-01.sqlite3
+python3 tools/backup_platform_metrics_ledger.py restore \
+  lab/evidence/platform-metrics-ledger-backup-01.sqlite3 \
+  --destination lab/imports/platform-metrics-ledger-restored.sqlite3
+```
+
+النسخ يستخدم SQLite online backup، يتحقق من بصمات السجل، ولا يكتب فوق ملف موجود. احتفظ بقاعدة SQLite والنسخ محلياً خارج Git؛ قبول الجودة والحقوق والمراجعة البشرية يظل شرطاً منفصلاً.

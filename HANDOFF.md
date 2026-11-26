@@ -1,5 +1,60 @@
 # تسليم واستئناف مصنع المحتوى
 
+## النتيجة الأخيرة — 2026-11-26
+
+- استؤنف العمل من الرأس `15667ebe6f41940e60e6dfc5124d5a7796f8089a` بعد التحقق من GitHub؛ PR #1 مفتوح Draft وغير مدموج، وCI على هذا الرأس كان PASS في run `45699159863`.
+- CI على `fd33a9296a48796b2d13b507690339ac7dfe7e8e` كشف سباق تهيئة عند استيراد سجل المقاييس لأول مرة بالتزامن: مستوردان قد يقرآن غياب `schema_version` قبل إدخاله. نقلت إنشاء الجداول وفحص/إدخال النسخة إلى داخل `BEGIN IMMEDIATE` قبل إدخال الصفوف، بحيث يحصل مستورد واحد على قفل الكتابة ثم ترى العمليات التالية المخطط المكتمل.
+- اختبار `tools/test_import_platform_metrics.py` يبدأ ثمانية مستوردين معاً على قاعدة جديدة، ويتحقق من إضافة 26 صفاً مرة واحدة ومن إعادة السبعة الآخرين كصفوف مكررة؛ نجح عشر مرات متتالية. نجح كذلك `py_compile` و`git diff --check`. رُفع إصلاح السباق في commit `1f8c89fac5f45ed2ab4a3e88ea4e9e2969f8fab3` واجتاز التحقق الكامل في GitHub Actions run `45754141634`؛ شمل ذلك `tools/verify_repo.py` والرندر والاستعادة وفك الترميز وبناء Motion Canvas. كان run `45753715705` قد كشف السباق قبل الإصلاح.
+- أغلقت فجوة خصوصية محلية في `tools/job_ledger.py`: SQLite كانت تنشئ ملف القاعدة وjournal بوضع `0644`. صار السجل ينشئ/يفتح ملفاً عادياً دون اتباع symlink، ويضبط القاعدة وjournal إلى `0600`؛ كما يضيّق صلاحية قاعدة موجودة قبل استخدامها. ويرفض سجل المهام الآن اكتمال أثر صفري البايت.
+- اختبار `tools/test_job_ledger.py` نجح `12/12`، بما فيها فحص صلاحيات قاعدة جديدة، تأمين قاعدة موجودة وضعها أوسع، وصلاحية journal أثناء المعاملة ورفض الأثر الفارغ. اختبارات recorder والمراجع والmanifest والمقاييس والاستعادة وcheckpoint، و`py_compile` وNode syntax وVite build و`git diff --check` نجحت أيضاً.
+- `python3 tools/verify_repo.py` في بيئة التنفيذ الحالية توقف قبل الاختبارات لغياب `rsvg-convert`. تحقق الرندر والاستعادة الكامل مطلوب عبر CI؛ لم أستخدم sudo أو أثبت أدوات نظام.
+- دفعة صلاحيات ملفات SQLite رُفعت على `5eab6eebcc4e9f4676fbe54dba6b52c1d54e506a` واجتازت run `45753329857`. رفض الأثر الفارغ أضيف بعدها، والتحقق الكامل على الرأس الأحدث اجتاز run `45754141634`.
+- أحدث commit برمجي `1f8c89fac5f45ed2ab4a3e88ea4e9e2969f8fab3` اجتاز CI الكامل؛ هذا التعديل يوثق النتيجة فقط ويحتاج CI على الرأس التوثيقي النهائي. لا يتصل سجل المهام بعامل أو API، ولا يسجل موافقة بشرية أو يصدّر.
+- ما يزال المحتوى والحقوق وبيانات المنصات والصوت العربي وn8n وPi يحتاج مدخلات أو مراجعة/تأهيل فعلي؛ لا تسجل موافقات افتراضية ولا تفتح التصدير أو النشر.
+
+## متابعة 2026-11-25: تحقق بيانات أثر المهمة
+
+- مراجعة `complete` في سجل المهام أظهرت أن النسخة السابقة كانت تحفظ `artifact_sha256` و`artifact_bytes` كما أرسلهما المستدعي من دون فحص الملف. أضفت تحققاً فعلياً لملف داخل `lab/evidence/`، ومنع الروابط الرمزية، ومطابقة الحجم وSHA-256 قبل الانتقال إلى `review_required`.
+- وسعت `tools/test_job_ledger.py` إلى 11 حالة بإضافة الملف المفقود والحجم/البصمة الخطأ والرابط الرمزي ثم الاكتمال الصحيح. `python3 tools/test_job_ledger.py` PASS (11/11)، و`python3 -m py_compile tools/job_ledger.py tools/test_job_ledger.py` و`git diff --check` PASS. الملفات المؤقتة تنشأ في مسار `TEST_ONLY` تحت `lab/evidence/` وتنظفها الاختبارات.
+- حدثت README و`docs/LOCAL_WORKFLOW_NEXT_STEP.md` لتوضيح حد التحقق. `tools/verify_repo.py` يتضمن الاختبار؛ نتيجة التشغيل الكامل بعد التغيير مسجلة أدناه.
+- أُعيد `python3 tools/verify_repo.py` كاملاً بعد هذا التغيير ونجح (`Repository verification: PASS`). فحص الاستعادة في `lab/evidence/content-package-recovery-20261125T204843Z-TEST_ONLY/` اجتاز الرندر وفك الترميز، استعاد 31 ملفاً ببصمات SHA-256 متطابقة، ومراجعة المخرجات؛ ثم نجحت فحوص Python/Node و`npm ci --legacy-peer-deps` (صفر ثغرات مُعلنة) وبناء Motion Canvas 847 وحدة. الحالة البشرية بقيت `PENDING_USER_REVIEW`.
+- الرأس البعيد الحالي قبل الإصلاح `64ff8a3eacc15489df97c5434394107319176e3b`؛ CI كان PASS عليه في run `45697815176`. الخطوة التالية: افحص staged diff والأنماط الحساسة، commit/push عادي، انتظر CI على الرأس الجديد، وحدّث PR #1 بنتيجة التحقق مع إبقائه Draft.
+
+## إغلاق الدفعة المحلية — 2026-11-25
+
+- آخر دفعة كود `b945e65a6f8cb81992f2f3ef57ce450f75eab54f` اجتازت `python3 tools/verify_repo.py` محلياً بالكامل، ثم GitHub Actions run `45697371211` على نفس الرأس. يشمل ذلك رندر/فك ترميز/استعادة `TEST_ONLY` وبصمات 31 ملفاً وبناء Motion Canvas.
+- آخر PR تحققته: #1 `OPEN`, `Draft`, غير مدموج؛ الوصف حُدث بنتائج سجل المهام وأداة الوسائط والفحوص والبوابات المتبقية. `git fetch origin` أكد أن المحلي والبعيد على `b945e65` والشجرة نظيفة وقت الفحص.
+- بعد هذا السجل قد يُنشأ commit توثيق فقط لتسجيل هذه النتيجة. إذا صار، يجب انتظار CI عليه وإبقاء PR Draft؛ ماكو تعديل كود إضافي مبرر قبل المدخلات الخارجية المذكورة أدناه.
+- لا توجد حالياً فجوة برمجية مستقلة يمكن إثبات إغلاقها بأمان دون وصل API/هوية عامل، صلاحية n8n، Pi، بيانات منصة مصرح بها، أو مراجعة بشرية. لا تنشئ موافقات أو مقاييس حقيقية افتراضية، ولا تفتح الوجهة/النشر.
+
+## استئناف 2026-11-25: سجل مهام محلي بعقود leases
+
+- المراجعة بعد CI وجدت أن `lab/checkpoint.py` يختبر إعادة المحاولة فقط ولا يحقق حجز العامل/heartbeat/منع العامل المتأخر الموصوف بالعقد. استخدمت هذا harness لتحديد الحد، ثم أضفت `tools/job_ledger.py` كطبقة SQLite محلية مستقلة دون API أو ربط n8n/Pi. يسجل الهوية المركبة idempotently، و`queued/running/retry_wait/review_required/blocked/failed/cancelled`، مع lease عشوائي وheartbeat وfencing واكتمال idempotent/backoff وسقف ثلاث محاولات.
+- الوجهة `local` فقط، قاعدة البيانات لا تُقبل إلا في `lab/imports/` أو `lab/evidence/` وبامتداد `.sqlite3` وبدون symlink، ومسارات المخرج POSIX نسبية؛ هذه الحدود تمنع توجيه النموذج إلى تخزين متعقب أو وجهة نشر. لم أضف حالة قبول بشري أو `exported` لأن السجل لا يملك هوية/موافقة حقيقية ولا ينفذ تسليماً.
+- `tools/test_job_ledger.py`: عشر حالات للواردات المتزامنة، مطالبات متزامنة، backoff والسقف، انتهاء/استبدال lease، heartbeat، fencing، completion idempotency، الحجب والإلغاء، والمخطط والمسارات والمدخلات المشوهة. أول تشغيل كشف عدم تطابق نص رسالة رفض symlink مع التوقع؛ حسّنت رسالة الخطأ وأعدت الاختبار، ثم وسعت فحص الأنواع والمسارات، وآخر تشغيل `10/10 PASS`. `py_compile` و`git diff --check` PASS.
+- حدّثت README و`docs/LOCAL_WORKFLOW_NEXT_STEP.md` لتوضيح ما ينجزه السجل وما لا يفعله، وأضفت الاختبار إلى `tools/verify_repo.py`. ما زالت مراجعة/اعتماد المحتوى وواجهة/API والعامل الحقيقي والربط مع Pi/n8n خارج التنفيذ المحلي الآمن.
+- الفحص الكامل النهائي: `python3 tools/verify_repo.py` — `Repository verification: PASS`؛ شمل 10 حالات سجل جديدة، اختبار تقييم الوسائط، الرندر والاستعادة (31 ملفاً وبصمات SHA-256 متطابقة) في `lab/evidence/content-package-recovery-20261125T203952Z-TEST_ONLY/`، فحوص Python/Node، `npm ci --legacy-peer-deps` وصفر ثغرات مُعلنة، وبناء Motion Canvas 847 وحدة. الجودة البشرية بقيت `PENDING_USER_REVIEW`.
+- أول تشغيل لـ`python3 tools/test_job_ledger.py` كشف أن رسالة رفض symlink لم تطابق الوصف المحدد بالاختبار؛ لم يكن هناك قبول للملف. عدّلت صياغة الرسالة، ثم شغّلت الاختبار المركّز 9/9 PASS وأعدت التحقق الكامل أعلاه بنجاح.
+- الرأس البعيد قبل هذه الدفعة `e5751eb6984f9c8df969a0c0e9b24c3dce299757`؛ CI كان PASS عليه في run `45695312990`. الخطوة التالية: افحص staged diff والأسرار، اعمل commit/push عادي، انتظر CI على الرأس الجديد، ثم حدّث PR #1 بنتيجة CI المحلية/البعيدة مع إبقائه Draft.
+
+## استئناف 2026-11-25: مزامنة الفرع وفحص شامل وإصلاح أداة التقييم
+
+- فحص البداية: macOS 27.0 / arm64؛ Python `3.15.2`، Node `24.21.0`، npm `11.19.0`، Git `2.55.0`، FFmpeg/FFprobe `7.1.1`، `rsvg-convert 2.63.4`، ومساحة حرة `153 GiB`. كل أدوات الوسائط المطلوبة موجودة، لذلك ما احتجت تثبيتاً أو `sudo`.
+- المجلد كان نظيفاً على `main` عند `d60148c08625e88d36ec357a1621ced92a670ea8`. بعد `git fetch origin --prune` أنشأت فرع التتبع المحلي `codex/public-ci-baseline` من البعيد من دون تغيير الملفات. HEAD بداية العمل طابق `origin/codex/public-ci-baseline` عند `8cb9e62fea43d4578cf5379a2ad02167e14406bc`. PR #1 مفتوح Draft وغير مدموج، وCI الأساسي `45681907478` ناجح على ذلك الرأس.
+- شغّلت `python3 tools/verify_repo.py` قبل التغيير وبعده. التشغيل الأول PASS على المستودع الكامل: حالات checkpoint، التحليل والاستيراد والنسخ، pipeline، مراجعة manifest والمراجع، استعادة/rerender ومقارنة SHA-256 لـ31 ملفاً، Python/Node، `npm ci --legacy-peer-deps` (صفر ثغرات مُعلنة)، وبناء Motion Canvas عبر TypeScript/Vite (`847` وحدة). بعد الإصلاح شغّلته مرة أخرى وكانت النتيجة النهائية أيضاً `Repository verification: PASS`؛ استخدم الاستعادة المسار `lab/evidence/content-package-recovery-20261125T202413Z-TEST_ONLY/`.
+- بعد دفع إصلاح الكود `e02eb868d6a0f1de5530db1285d2efe91f887225`، نجح GitHub Actions run `45694949340` على نفس HEAD (الخطوة `Run complete repository verification` وCI كاملين PASS، 1m30s). PR #1 ظل مفتوح Draft أثناء الفحص.
+- خلال مراجعة الأدوات وجدت أن `tools/record_media_evaluation.py` كان يكتب مسار الأصل المطلق إلى CSV الافتراضي المتعقب، وأنه يلحق بملف موجود حتى لو كان رأسه مخالفاً للمخطط. صار يسجل مساراً نسبياً داخل المستودع فقط، يحسب SHA-256 على أجزاء، ويرفض الملفات خارج المستودع، والرؤوس المخالفة والوجهات الرمزية. أضفت `tools/test_record_media_evaluation.py` وربطته بـ`tools/verify_repo.py`، وحدّثت طريقة الاستخدام في `docs/LOCAL_AUDIO_MOTION_EVALUATION.md`. السبب: منع كشف اسم/مسار المستخدم وتلف سجل التقييم؛ القرار يقصر الأصول المسجلة على المستودع لتظل الإحالة قابلة للنقل.
+- `python3 tools/test_record_media_evaluation.py` PASS. `python3 -m py_compile tools/record_media_evaluation.py tools/test_record_media_evaluation.py tools/verify_repo.py` و`git diff --check` PASS. فحص Git regex لمفاتيح شائعة لم يجد أسراراً؛ ولا ملفات `.env` أو قواعد SQLite أو أصول `TEST_ONLY` أو نماذج ضمن الملفات المتعقبة. `gitleaks` و`trufflehog` و`semgrep` و`bandit` غير مثبتة؛ لا أسجل فحصاً بها.
+- لا تغيير في سياسة الميزانية أو النشر، ولا بيانات حسابات أو محتوى حقيقي؛ n8n لم يُشغّل. بوابات الصوت/الحقوق/مراجعة الجودة البشرية/بيانات المنصات/Pi ما زالت تنتظر مدخلاتها المحددة في الأقسام أدناه.
+- الخطوة التالية: احفظ تحديث HANDOFF هذا بcommit توثيق صغير وادفعه إلى `codex/public-ci-baseline`، انتظر CI على HEAD النهائي، ثم حدّث وصف PR #1 بنتائج الفحص المحلي وCI الأحدث مع إبقائه Draft.
+
+## دفعة تحقق مراجع الحزمة — 2026-11-25
+
+- تحققت من GitHub: الفرع `codex/public-ci-baseline` ما زال عند `1fd7f6e6863cd25c55653b83cd77bdadeb45f233`، وPR #1 مفتوح Draft وغير مدموج. Actions run `45283100080` نجح على هذا الرأس؛ combined status endpoint لم يعرض checks منفصلة.
+- أثناء مراجعة عقد الحزمة اكتشفت أن `source_id` و`claim_id` غير الفريدة كانت تُقبل، وأن عناصر غير نصية داخل `source_ids` قد ترفع `TypeError` بدلاً من رفض حزمة واضح. أضفت تحقق التفرد ونوع/وجود المعرفات ومراجع المصادر، واختبار انحدار مستقل، وربطته بـ`tools/verify_repo.py`. حدّثت العقد لتسجيل تفرد `source_id`.
+- الفحوص المنفذة لهذه الدفعة: `python3 tools/test_content_package_references.py` PASS؛ `python3 tools/test_content_package_pipeline.py` بدأ لكنه توقف عند اعتماد النظام المفقود (`rsvg-convert`, `ffmpeg`, `ffprobe`) قبل إتمام الرندر. لذلك فحوص CI الكاملة مطلوبة بعد الدفع. لم يُشغّل `tools/verify_repo.py` بعد هذه الدفعة؛ معروف أنه سيتوقف في فحص الأدوات نفسه على هذه الآلة.
+- لا بيانات/أصول أو أذونات بشرية أضيفت؛ لا نُشر محتوى ولا شُغّل n8n. بوابات الحقوق والمراجعة والصوت والبيانات الفعلية وPi باقية كما هي.
+
 آخر تحديث: 2026-11-17 (`Asia/Baghdad`)
 
 ## الحالة المحفوظة
@@ -398,3 +453,88 @@ ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate,nb_fr
 - بعد الرفع أُعيدت الفحوص: `python3 lab/test_checkpoint.py` PASS (6/6)، `python3 tools/test_content_package_pipeline.py` PASS، `python3 tools/test_content_package_recovery.py --run-name content-package-recovery-post-push-2026-11-22-TEST_ONLY` PASS (31 ملفاً، SHA-256 متطابقة، مراجعة الأصل/الاستعادة متطابقة)، `py_compile` PASS، `node --check lab/motion.mjs` PASS، `git diff --check` PASS، و`(cd lab/motion-canvas && npm run build)` PASS (847 modules، 0.945s).
 - آخر فحص رؤية للحركة ما زال بانتظار المستخدم. فيديوهات v9 والـcontact sheets تحت `lab/evidence/motion-content-selection-TEST_ONLY/` محلية ومستثناة من Git. لا صوت أو نشر، وبوابات الحقوق والجودة والتصدير مغلقة.
 - بيانات التشغيل الخاصة وقواعد البيانات والاعتمادات مستثناة؛ ملفات الأداء الحقيقية توضع في `lab/imports/` وتبقى محلية. بداية التطوير على جهاز آخر: clone الريبو الخاص، تأكد من الأدوات حسب README، ثم شغّل أوامر الفحوص الأساسية من جذر المشروع. n8n يبقى متوقفاً.
+
+## استئناف 2026-11-24: أول CI على المستودع العام
+
+- تحقق GitHub API من أن `ali96adil/ContentFactory` صار `public`. تم clone من `origin/main` عند `d60148c08625e88d36ec357a1621ced92a670ea8`؛ شجرة `main` كانت نظيفة. بدأ العمل على فرع محلي `codex/public-ci-baseline`.
+- لم يكن بالمستودع workflow تحت `.github/workflows/`، ولم تظهر CI runs على الرأس الحالي. أضيف `.github/workflows/ci.yml` لفحوص Python والـpipeline والاستعادة وTypeScript/Vite على runner قياسي عام، بأقل صلاحيات `contents: read`، ونسخ GitHub Actions مثبتة على SHA. أدوات الوسائط تُثبت داخل container مؤقت بـUbuntu 24.04.
+- نتيجة البيئة المحلية: `python3 lab/test_checkpoint.py` PASS (6 حالات)، `py_compile` و`node --check lab/motion.mjs` و`git diff --check` PASS. نجح `npm ci --legacy-peer-deps` ثم `npm run build` (847 modules؛ Vite 1.40s). التثبيت النظيف `npm ci` بلا الخيار فشل بـ`ERESOLVE`: `@motion-canvas/vite-plugin@3.17.2` يعلن Vite 4/5 بينما المشروع يستخدم Vite 7. وثّقت workaround وحدوده في README؛ ما اعتبرنا peer range محلولاً.
+- تعذر تشغيل `tools/test_content_package_pipeline.py` محلياً لأن `rsvg-convert` غير موجود في بيئة Codex (FFmpeg وFFprobe موجودان). الـworkflow يثبت `librsvg2-bin` وFFmpeg لعزل هذا الاعتماد؛ يجب انتظار نتيجة GitHub Actions بعد push قبل اعتبار CI ناجحاً.
+- لا يشمل هذا التغيير اعتماد جودة بشرية أو حقوق أو تصدير أو نشر؛ تبقى مراجعة حركة الفيديوهات والبيانات الفعلية والصوت العربي معلّقة كما سبق. لا تشغّل n8n؛ لا تضع مفاتيح أو بيانات شخصية في Git.
+- الخطوة التالية: ارفع فرع `codex/public-ci-baseline` إلى GitHub، تأكد أن workflow ينجح على clone عام نظيف، أصلح أي مشكلة تظهر، ثم أنشئ PR للمراجعة. بعد نجاحه استمر بجلسة التطوير من الفجوات القابلة للإثبات برمجياً، وسجّل ما يتطلب بيانات/استماع/موافقة بشرية كحواجز واضحة.
+
+## استئناف 2026-11-24: إصلاح أول فشل CI وتغطية محلل الأداء
+
+- فحص GitHub Actions للـPR #1 أظهر أن التثبيت وتجهيز الأدوات نجحا، لكن `python lab/test_checkpoint.py` توقف قبل الاختبارات لأن صورة `ubuntu:24.04` لا تتضمن `libsqlite3.so.0` التي يحتاجها Python المجهز. أضفت `libsqlite3-0` إلى التثبيت داخل الحاوية. مصدر النتيجة: سجل job `138029732103` في run `45270792883`.
+- أضفت `tools/test_analyze_platform_metrics.py`: ثلاث حالات تغطي قفل `TEST_ONLY` على `test_only_no_action` ومنع التوسع/التصدير/النشر، رفض القيم الرقمية الفارغة وغير الرقمية والسالبة وغير المنتهية، وقبول القيم المحدودة. اكتشف الاختبار أن `NaN` و`Infinity` كانت تمر من التحقق الرقمي؛ صار المحلل يرفض كل القيم غير المحدودة عبر `math.isfinite`.
+- الفحوص المحلية بعد التعديل: `python3 tools/test_analyze_platform_metrics.py` PASS (3/3)، `python3 lab/test_checkpoint.py` PASS (6/6)، `python3 -m py_compile tools/analyze_platform_metrics.py tools/test_analyze_platform_metrics.py` PASS، و`git diff --check` PASS. لم يُعد تشغيل GitHub Actions على التعديل بعد؛ لذلك لا يُعلن CI ناجحاً حتى تظهر نتيجة جديدة.
+- بعد رفع الإصلاح، نجح GitHub Actions على run `45271691934` والرأس `d01fda4fbca0977889a040ca8addb4b14166c001`: تجهيز Ubuntu، SQLite، فحوص Python، اختبار pipeline والاستعادة، وبناء Motion Canvas كلها PASS.
+- في مراجعة مدخلات CSV، أضفت رفض الصفوف القصيرة/الزائدة، وعناوين الأعمدة المكررة، و`data_origin` الفارغ أو غير المعروف، ورسالة مفهومة لتاريخ غير ISO 8601. المصادر المعروفة هي `manual_export` و`manual_entry`؛ وتظل بيانات `synthetic`/`TEST_ONLY` محجوبة كما كانت.
+- الفحوص المحلية بعد دفعة التحقق: `python3 tools/test_analyze_platform_metrics.py` PASS (5/5)، تشغيل CLI على fixture تحقق من `TEST_ONLY_SYNTHETIC` ومنع النشر وكل التوصيات `test_only_no_action` PASS، `python3 -m py_compile tools/analyze_platform_metrics.py tools/test_analyze_platform_metrics.py` PASS، و`git diff --check` PASS. لم تصل هذه الدفعة الأخيرة إلى GitHub بعد.
+- الملفات المتغيرة في الدفعة التالية: `tools/analyze_platform_metrics.py`, `tools/test_analyze_platform_metrics.py`, و`HANDOFF.md`. لا بيانات أو أسرار أو اتصال منصات أو نشر. PR #1 يبقى Draft وبلا دمج.
+- الخطوة التالية: ارفع دفعة التحقق إلى نفس فرع PR #1، وتأكد من نجاح CI على الرأس الجديد. بعد ذلك راجع تغطية المستودع المتبقية وواصل مهمة محلية قابلة للإثبات؛ اترك الحركة والصوت والحقوق وبيانات الأداء الحقيقية كبوابات تحتاج المدخلات/المراجعة المناسبة.
+
+## استئناف 2026-11-24: أمر تحقق موحد قبل جولة التأهيل
+
+- أضفت `tools/verify_repo.py` كمدخل واحد لتشغيل checkpoint، واختبارات محلل المقاييس والحزمة والاستعادة، و`py_compile` و`node --check`، ثم `npm ci --legacy-peer-deps` وبناء Motion Canvas. يفحص الأدوات المطلوبة مسبقاً، وينشئ اسماً زمنياً فريداً لأدلة الاستعادة لتفادي الكتابة فوق تجربة سابقة.
+- حدّثت CI ليشغّل الأمر نفسه داخل حاوية Ubuntu بعد تثبيت FFmpeg وSQLite وlibrsvg، وحدّثت README بأمر التحقق الكامل. الهدف توحيد الفحص المحلي مع CI على أجهزة التطوير.
+- الفحص المحلي: `python3 -m py_compile tools/verify_repo.py` PASS، و`git diff --check` PASS. محاولة `python3 tools/verify_repo.py` توقفت قبل الاختبارات بسبب غياب `rsvg-convert` في بيئة التنفيذ الحالية؛ لم أستخدم `sudo` أو أثبت حزم النظام.
+- بعد الرفع، نجح الأمر الكامل على GitHub Actions run `45274762498` والرأس `53af0867362933b5407a55ea8ff89388b1917be9`: الفحوص البرمجية، رندر/استعادة الحزمة، وفحص بناء Motion Canvas اكتملت كلها بنجاح. الاستعادة أنشأت مجلد أدلة فريداً موسوماً `TEST_ONLY`؛ ما انرفع أي artifact إلى Git.
+- نتيجة هذه الجولة: بوابة التحقق البرمجي على نسخة clone نظيفة PASS. تشغيل الأمر محلياً على هذه الآلة ما زال يحتاج `rsvg-convert`؛ لا يُعد هذا فشل المشروع لأن CI جهّز الأداة مؤقتاً، لكنه قيد محلي موثق. PR #1 مفتوح Draft وبلا دمج.
+
+## استئناف 2026-11-24: إغلاق مسارات manifest والتحقق العددي
+
+- راجعت تدفق `tools/review_content_package_render.py`: كان يضم `item["path"]` من manifest إلى مسار artifacts مباشرة، من دون منع المسارات المطلقة أو `../` أو الروابط الرمزية. أضفت `validate_renderer_manifest` لفرض اسم ملف مباشر موسوم `TEST_ONLY`، موجود كملف عادي، ومن دون تكرار؛ ويُرفض manifest غير المصفوفي أو العنصر غير الكائني. أُضيف اختبار انحدار يغطي traversal والمسار المطلق والمفقود وغير الموسوم والمكرر والـsymlink.
+- صار التقرير يُتحقق من كونه JSON object. نقلت إنشاء مجلد المراجعة إلى ما بعد نجاح تحويل contact sheet، كي لا يبقى مجلد جزئي يمنع المحاولة الجديدة عند فشل `rsvg-convert`.
+- أثناء مراجعة عقد الحزمة، أصلحت `target_duration_minutes` لقبول الأعداد المحدودة الموجبة فقط، مع رفض `NaN` وInfinity والأعداد الأكبر من مجال التحويل. أضفت حالة pipeline لانحدار `NaN`، وحدّثت مرجع العقد وخارطة سير العمل وREADME لتطابق تدفق الحزمة الحالي.
+- النتائج المحلية المنفذة على هذا التعديل: `python3 lab/test_checkpoint.py` PASS (6/6)، `python3 tools/test_analyze_platform_metrics.py` PASS (5/5)، `python3 tools/test_review_content_package_render.py` PASS، و`py_compile` لكل أدوات التحقق و`node --check lab/motion.mjs` و`git diff --check` PASS. `python3 tools/verify_repo.py` توقف قبل الاختبارات لأن `rsvg-convert` غير مثبت في بيئة Codex؛ لا استخدام لـsudo ولا تثبيت نظامي.
+- أضفت اختبار manifest إلى `tools/verify_repo.py`. يجب أن يجتاز `tools/test_content_package_pipeline.py` واختبار الاستعادة وبناء Motion Canvas في CI على رأس هذه الدفعة قبل اعتماد نتيجتها.
+- الحالة الخارجية: PR #1 يبقى Draft وغير مدموج. لا اتصالات بمنصات ولا نشر ولا أسرار في المستودع. مراجعة الفيديوهات/الترجمة والحقوق والصوت العربي وبيانات الأداء الفعلية واختبار جهاز Pi تبقى متطلبات خارج الفحص البرمجي؛ n8n ما زال متوقفاً.
+
+## إغلاق دفعة التحقق على GitHub — 2026-11-24
+
+- تشغيل GitHub Actions `45277164412` على الرأس `9381c1e75395584de8872a19dceffb9563107c8d` اكتمل PASS، بما فيه `tools/verify_repo.py`: اختبارات checkpoint والمقاييس وpipeline، اختبار manifest، backup/restore، Python وNode، و`npm ci --legacy-peer-deps` ثم Vite build. الشجرة المحلية طابقت الشجرة البعيدة قبل مزامنتها، وصارت نظيفة على الرأس نفسه.
+- فحص عالي الثقة لأنماط الأسرار مرّ على الملفات المتتبعة وكل تاريخ Git القابل للوصول؛ لم تظهر مفاتيح خاصة أو رموز GitHub/AWS أو تعيينات سرية واضحة. هذا فحص regex محلي وليس ضماناً شاملاً لكل صيغة بيانات حساسة.
+- تحديث مصدر n8n: صفحة الإصدارات الرسمية تعرض `2.48.8` كـstable بتاريخ 2026-11-23؛ تقرير `docs/N8N_AUDIT_REVIEW.md` حُدّث ليعلّم نتيجة dist-tags القديمة كبيانات بتاريخ 2026-11-17. لم نثبت أو ندقق الشجرة الأحدث؛ n8n بقي متوقفاً. تشغيله يظل محجوباً حتى audit منفصل ومراجعة شروط الترخيص.
+- PR #1 ما زال Draft وغير مدموج. بعد تحديث سجل n8n، اكتمل الفحص الموحد على الرأس `e60c739fea9309eeb32cb03f7ecbc7bbc4bc8ca2`: GitHub Actions run `45277783981` — PASS. التغيير بعد الاختبار محصور بتسجيل هذه النتيجة في HANDOFF؛ لا تغييرات كود. استمر من حدود النسخة التجريبية: فحص candidate n8n يحتاج npm registry، وPi/الحسابات/المراجعة البشرية تحتاج وصولاً أو مدخلات فعلية؛ تبقى الحقوق والجودة والتصدير والنشر مقفلة.
+
+## متابعة فحص n8n المرشح — 2026-11-24
+
+- توفر npm registry؛ أنشأت package-lock مرشحاً لـ`n8n@2.48.8` في `/tmp/contentfactory-n8n-candidate-2.48.8/` فقط، باستخدام `--package-lock-only --ignore-scripts`، ثم شغّلت `npm audit --omit=dev --json`. لم تُنزّل الحزم، ولم يُمس lockfile المثبت أو بيانات n8n، ولم تبدأ الخدمة. نتيجة npm audit exit `1`: 146 إدخالاً متأثراً (30 critical، 71 high، 43 moderate، 2 low)، و125 advisory URL فريدة. 140 سجل إصلاح تقترح major rollback إلى `1.17.0`؛ لا أوصي بتشغيل 2.48.8 أو ترقيع الاعتماديات عشوائياً. وثقت الأوامر في `docs/N8N_AUDIT_REVIEW.md`، وحدّثت مصفوفة `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
+- هذه نتيجة candidate محلية غير مضافة للمستودع، وليست استعادة آمنة لـn8n. المشروع يستمر بلا منسّق حتى تحديث upstream يقلل advisories دون downgrade major أو تتوفر بيئة اختبار توافق معزولة. الميزانية بقيت صفراً.
+
+## بوابة استيراد القياسات المحلية — 2026-11-24
+
+- أضفت `tools/import_platform_metrics.py` كسجل SQLite محلي لدفعة استيراد CSV المصرح بها. يمنع database خارج `lab/imports/` و`lab/evidence/` أو عبر symlink، ويشترط CSV تحت `lab/imports/` أو fixtures/evidence، ووقت قياس يحمل UTC offset. يطبع ملخص أعداد فقط، ولا يتصل بمنصة أو يسمح بالتصدير/النشر.
+- مفتاح اللقطة هو (platform, account alias, post id, observed_at UTC). إعادة الصف المطابق تتجاهله؛ اللقطة الموجودة بقيم مختلفة ترفض المعاملة كاملة وتعمل rollback لأي صفوف جديدة ضمن نفس الدفعة. حالات `TEST_ONLY` تبقى موسومة ولا تتحول إلى توصيات سوق.
+- أضفت `--ledger` إلى `tools/analyze_platform_metrics.py`: يقرأ SQLite بوضع read-only، ويتحقق من إصدار المخطط وبصمة كل سجل ومفتاح هويته قبل تمرير الصفوف إلى قواعد المقارنة. اختبار CLI يؤكد أن ledger الاختباري يظل `TEST_ONLY_SYNTHETIC` مع تعطيل التصدير والنشر.
+- أضفت `tools/test_import_platform_metrics.py` إلى خطة التحقق. التشغيل الفعلي للـfixture: استيراد `26` صفاً ثم إعادة الملف أعطت `0` إدخال و`26` duplicate؛ تحويل توقيت مكافئ من UTC إلى `+03:00` بقي duplicate؛ تعديل لقطة تاريخية رفض الدفعة وأبقى العدد `26`. استيراد متزامن مزدوج أدخل `26` مرة واحدة واحتسب `26` تكراراً. كما رُفض timestamp بلا timezone، CSV فارغ، DB خارج المسارات المسموحة، وDB symlink.
+- الفحوص المحلية لهذه الدفعة: `python3 tools/test_import_platform_metrics.py` PASS، اختبارات المحلل `5/5` PASS، checkpoint `6/6` PASS، `py_compile` و`node --check lab/motion.mjs` و`git diff --check` PASS. الفحص الموحد محلياً يتوقف عند `rsvg-convert` غير المثبت؛ التحقق الكامل لهذه الدفعة يتطلب CI بعد رفع الفرع.
+- هذا يغلق تكرار إدخال CSV محلياً فقط؛ ماكو ملف منصة حقيقي ولا قرار تلقائي أو طابور n8n. أدرجت الاختبار في `tools/verify_repo.py`. لاحظت أن push فرع PR يطلق workflow مرتين (`push` و`pull_request`)، لذلك قيدت push trigger إلى `main` فقط مع إبقاء تحديثات PR؛ هذا يخفض دقائق CI للدفعات التالية. قاعدة البيانات الناتجة اختبارية محلية وتبقى خارج Git. الإجراء التالي: ارفع التغييرات، راقب تشغيل PR واحد، وأصلح أي فشل قبل إغلاق الدفعة.
+
+## استعادة سجل القياسات المحلي — 2026-11-24
+
+- أضفت `tools/backup_platform_metrics_ledger.py` لنسخ/استعادة قاعدة القياسات عبر SQLite online backup إلى وجهة محلية جديدة. يرفض المصدر غير الموثوق والمسارات خارج `lab/imports/` و`lab/evidence/`، يمنع symlink والكتابة فوق ملف موجود، ينشئ الملف بوضع `0600`، ثم يعيد قراءة كل الصفوف ويتحقق من البصمات قبل تثبيته ذرياً.
+- `tools/test_backup_platform_metrics_ledger.py` يختبر استيراد 26 صفاً `TEST_ONLY`، نسخها واستعادتها مع تطابق digest، منع استبدال وجهة موجودة، ورفض قاعدة ليست ledger. التشغيل المحلي PASS. ربطت الاختبار وفحص py_compile بـ`tools/verify_repo.py` وأضفت أمثلة الأوامر إلى README ودليل المقاييس.
+- فحص CI السابق للرأس `36d232a8a484e185eced1471fd9b39234ddb95f8` نجح على مسار الاستيراد والتحليل التراكمي. تغييرات النسخ والاستعادة الحالية تحتاج تشغيل CI جديد؛ الفحوص الموضعية `test_backup_platform_metrics_ledger.py`, `test_import_platform_metrics.py`, `py_compile` و`git diff --check` مرّت. اختبار المستودع الكامل المحلي يبقى معطلاً قبل البدء بسبب عدم وجود `rsvg-convert`.
+- هذا يغطي backup/restore لسجل المقاييس المحلي فقط؛ ماكو قاعدة n8n أو إعدادات workflow أو Pi بهذه الحزمة. لا ترفع قواعد SQLite إلى Git.
+
+
+## إغلاق اختبار سجل القياسات — 2026-11-24
+
+- اكتمل GitHub Actions run `45282210221` بنجاح على `be309228e20a633ba758b17f331b6527e0b35fa8`؛ تحقق الأمر الموحد من checkpoint، تحليل المقاييس، pipeline، manifest، استيراد سجل القياسات، backup/restore، Python وNode، وMotion Canvas/Vite. كان هذا تشغيل PR واحداً على الحدث `pull_request`.
+- نتيجة التحقق المحلي: الاختبارات الموضعية ناجحة، لكن `python3 tools/verify_repo.py` يتوقف قبل بدء الاختبارات لأن `rsvg-convert` غير متوفر في بيئة التنفيذ. CI يوفّر `librsvg` داخل حاوية مؤقتة؛ لم نثبت أدوات نظام محلياً.
+- حدّثت README ومصفوفة الخطوة التالية لتعكسا الاختبارات الجديدة ورقم الرأس/run. لا تغيير في الكود بهذه الدفعة. PR #1 ما زال Draft وغير مدموج.
+- المسارات البرمجية المتاحة حالياً لها تغطية CI ناجحة. ما يبقى خارج إغلاق هذه الجلسة هو اعتماد بشري على الشكل والقراءة، بيانات حسابات حقيقية مصرح بها، قرار الحقوق، واختبار Pi؛ لا تُستبدل ببيانات أو موافقات افتراضية. n8n بقي متوقفاً بسبب نتيجة التدقيق الموثقة.
+
+## تحقق بيانات مراجعة الادعاءات — 2026-11-25
+
+- أغلقت فجوة تحقق في `tools/render_content_package.py`: الادعاء الموسوم `approved` يجب أن يتضمن نصي العربية البيضاء والإنكليزية ونوع الادعاء واسم المراجع المستعار ووقت مراجعة ISO-8601 بوقت UTC، إضافة إلى معرفات مصادر صالحة. المدقق يرفض المراجع الناقص أو الوقت المحلي برسالة محددة.
+- وسعت `tools/test_content_package_references.py` لحالات نقص المراجع ووقت مراجعة بفرق توقيت، وربطت الأداة سابقاً بـ`tools/verify_repo.py`. بقيت الحزمة التجريبية TEST_ONLY؛ وجود حقول مراجعة لا يثبت صدق القرار ولا يمنح موافقة إنتاج أو نشر.
+- الفحص الموضعي على `7c5dd08` نجح لاختبار المراجع، manifest، استيراد/نسخ المقاييس، تحليلها، checkpoint، و`py_compile`. هذا تعديل يحتاج دفعة مستقلة وفحص CI كامل قبل اعتماده.
+
+## تدقيق معرّفات الأصول وبصماتها — 2026-11-25
+
+- وسعت تحقق الحزمة ليرفض `asset_id` المكرر، ويفحص أن `sha256` بصمة سداسية من 64 خانة قبل مقارنة الملف. المقارنة تقبل الأحرف السداسية الكبيرة والصغيرة؛ تطابق البصمة لا يعني ثبوت الحقوق.
+- أضفت اختبارات للمعرفات المكررة والبصمة المشوهة وقبول البصمة الكبيرة، وربطت الاختبار الموجود مسبقاً بمدخل التحقق الموحد.
+- الفحوص الموضعية نجحت، وCI الكامل نجح على commit `0bef6695f5cf7c9cbf4f88c1bc1620be9f004a0b` قبل هذه الدفعة. تحتاج الدفعة الحالية CI جديداً قبل اعتمادها؛ بقيت بوابات الحقوق والنشر مقفلة.

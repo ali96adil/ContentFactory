@@ -86,4 +86,20 @@ node lab/n8n-local/node_modules/n8n/bin/n8n --version
 npm --prefix lab/n8n-local audit --cache "$PWD/lab/n8n-local/.npm-cache" --omit=dev --json
 ```
 
-الخطوة المعلقة القادمة: استعمل `tools/analyze_platform_metrics.py` على CSV فعلي مصرح به إذا توفر؛ اترك n8n متوقفاً. لا تستورد Workflow أو credentials.
+## متابعة 2026-11-24
+
+صفحة الإصدارات الرسمية تعرض `2.48.8` كوسم `stable` بتاريخ 2026-11-23، بعد النسخة المثبتة `2.47.7`. أعددت lockfile مرشحاً خارج المستودع في `/tmp/contentfactory-n8n-candidate-2.48.8/` فقط؛ لم أُنزّل حزم التنفيذ، ولم أُثبّت المرشح أو أشغّل الخدمة. استعلام npm أكد `n8n@2.48.8`، وترخيص الحزمة ما زال `SEE LICENSE IN LICENSE.md`، وشرط Node `>=24.0.0`.
+
+الأوامر القابلة لإعادة التشغيل:
+
+```sh
+mkdir -p /tmp/contentfactory-n8n-candidate-2.48.8
+npm --cache /tmp/contentfactory-n8n-audit-cache --prefix /tmp/contentfactory-n8n-candidate-2.48.8 install --package-lock-only --ignore-scripts --no-audit --save-exact n8n@2.48.8
+npm --cache /tmp/contentfactory-n8n-audit-cache --prefix /tmp/contentfactory-n8n-candidate-2.48.8 audit --omit=dev --json > /tmp/contentfactory-n8n-audit-2.48.8.json
+```
+
+الأمر الأخير خرج `1` بسبب advisories، وملف النتيجة بقي في `/tmp` ولم يدخل Git. التقرير سجل 146 إدخالاً متأثراً: 30 critical و71 high و43 moderate و2 low، تمثل 125 advisory URL فريدة. وحدها 6 سجلات اقترحت إصلاحاً مباشراً من دون major؛ في 140 سجل، اقترح npm الرجوع إلى `n8n@1.17.0` كتغيير major. لذلك `2.48.8` ليس ترقية آمنة معتمدة، والخدمة تبقى متوقفة. هذا يتجاوز معلومة 2026-11-17 القديمة التي رصدت 145 إدخالاً على شجرة 2.47.7.
+
+ملاحظات الإصدار لا تثبت معالجة advisories ولا ترخيص النموذج التجاري للاستخدام المطلوب. لا تعدّل lockfile المثبت أو تحاول ترقيع اعتماديات n8n يدوياً من دون مصفوفة توافق واختبارات؛ أعد فتح هذا المسار عند صدور تحديث يزيل نتائج audit دون downgrade major. [الإصدار الرسمي 2.48.8](https://github.com/n8n-io/n8n/releases/tag/n8n%402.48.8).
+
+الخطوة المعلقة القادمة: اترك n8n متوقفاً واستعمل `tools/analyze_platform_metrics.py` فقط على CSV فعلي مصرح به إذا توفر. لا تستورد Workflow أو credentials.

@@ -41,27 +41,26 @@ rsvg-convert --version
 
 لا يحتاج الرندر المحلي ملف `.env` أو حساب منصة. لا تحفظ مفاتيح أو كلمات مرور في الملفات. لا تثبّت أو تشغّل n8n لإجراء الاختبارات الحالية.
 
-## الفحوص الأساسية
+## فحص المستودع الكامل
 
 شغّل من جذر المستودع:
 
 ```sh
-python3 lab/test_checkpoint.py
-python3 tools/test_content_package_pipeline.py
-python3 -m py_compile tools/render_content_package.py tools/review_content_package_render.py tools/test_content_package_pipeline.py tools/test_content_package_recovery.py
-node --check lab/motion.mjs
+python3 tools/verify_repo.py
 ```
+
+يفحص الأمر توفر FFmpeg/FFprobe وlibrsvg وNode/npm، ثم يشغّل اختبارات checkpoint ومحلل الأداء والحزمة واحتواء مسارات manifest واستيراد سجل القياسات ونسخه/استعادته، وفحوص Python/Node، وتثبيت Motion Canvas وبناءه. ينشئ مجلد أدلة `TEST_ONLY` باسم جديد لكل استعادة حتى لا يستبدل نتيجة قديمة. GitHub Actions يستعمل أمر التحقق نفسه داخل حاوية Ubuntu مؤقتة؛ بذلك تكون خطوة CI المحلية وCI موحّدة.
 
 Motion Canvas اختياري. لاستخدام المحرر، من جذر المستودع اختر Node عبر `nvm use` ثم:
 
 ```sh
 cd lab/motion-canvas
-npm ci
+npm ci --legacy-peer-deps
 npm run build
 npm run start -- --host 127.0.0.1 --port 9000
 ```
 
-أوقفه بـ`Ctrl+C`. تثبيت `npm ci` يخص Motion Canvas فقط؛ الرندر القياسي لا يحتاج حزم npm.
+يحتاج التثبيت حالياً إلى `--legacy-peer-deps` لأن إضافة Motion Canvas `3.17.2` تعلن توافق Vite حتى الإصدار 5، بينما المشروع يختبر Vite 7. نجاح البناء يتحقق فعلياً في CI؛ لا يعني هذا أن نطاق peer المعلن صار متوافقاً. أوقف المحرر بـ`Ctrl+C`. تثبيت npm يخص Motion Canvas فقط؛ الرندر القياسي لا يحتاج حزم npm. فحوص GitHub Actions تعمل على runner قياسي عام، وتثبت أدوات الوسائط داخل بيئة CI المعزولة.
 
 ## رندر حزمة TEST_ONLY
 
@@ -88,6 +87,26 @@ python3 tools/test_content_package_recovery.py \
 - `lab/imports/`: ملفات أداء محلية مصرح بها، مستثناة من Git؛ اترك المقاييس غير المتوفرة فارغة ولا تخمّنها.
 - `lab/evidence/`: الفيديوهات والصور والتقارير وبيانات التشغيل المحلية؛ مستثناة من Git لأنها قد تكون كبيرة أو شخصية.
 - `HANDOFF.md`: سجل البيئة والنتائج والخطوة التالية. راجع أيضاً `docs/LOCAL_WORKFLOW_NEXT_STEP.md`.
+
+لاستيراد CSV أداء مصرح به إلى سجل محلي idempotent، استخدم ملف SQLite جديداً داخل `lab/imports/`، ثم حلل كل اللقطات المتراكمة من السجل:
+
+```sh
+python3 tools/import_platform_metrics.py lab/imports/platform-metrics-24h.csv \
+  --database lab/imports/platform-metrics-ledger.sqlite3
+python3 tools/analyze_platform_metrics.py --ledger lab/imports/platform-metrics-ledger.sqlite3
+python3 tools/backup_platform_metrics_ledger.py backup \
+  lab/imports/platform-metrics-ledger.sqlite3 \
+  --destination lab/evidence/platform-metrics-ledger-backup-01.sqlite3
+python3 tools/backup_platform_metrics_ledger.py restore \
+  lab/evidence/platform-metrics-ledger-backup-01.sqlite3 \
+  --destination lab/imports/platform-metrics-ledger-restored.sqlite3
+```
+
+إعادة الملف نفسه لا تضيف صفوفاً ثانية؛ نفس المنشور/وقت القياس بقيم مختلفة يرفض الدفعة كلها. تهيئة المخطط وإضافة الصفوف تجريان ضمن معاملة كتابة واحدة، حتى تتسلسل الاستيرادات المتزامنة عند إنشاء السجل لأول مرة. `--ledger` يحلل كل اللقطات المستوردة ويتحقق من بصماتها. أداة النسخ تستعمل SQLite online backup، تتحقق من صفوفه قبل تثبيته، ولا تستبدل وجهة موجودة. الأدوات لا تستدعي منصة ولا تصدر أو تنشر. لا تستخدم fixture التجريبية كبيانات سوق.
+
+## سجل المهام المحلي
+
+يوفر `tools/job_ledger.py` نموذجاً محلياً ذرياً لحالات العمل وleases حتى `review_required`. يستخدم SQLite تحت `lab/imports/` أو `lab/evidence/` فقط، ويرفض أي وجهة غير `local`. ملفات القاعدة وjournal خاصة بالمالك (`0600`). عند الاكتمال يتحقق من وجود أثر غير فارغ تحت `lab/evidence/` ويطابق الحجم وSHA-256 ويرفض symlinks. لا يفتح API، ولا يمنح موافقة بشرية، ولا يصدر أو ينشر. اختباره ضمن `python3 tools/verify_repo.py`؛ تفاصيل الحدود في [`LOCAL_WORKFLOW_NEXT_STEP.md`](docs/LOCAL_WORKFLOW_NEXT_STEP.md).
 
 ## الحركة والمراجعة
 

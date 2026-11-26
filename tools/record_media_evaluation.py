@@ -19,6 +19,37 @@ FIELDS = [
     "frame_rate", "generation_s", "source_url", "license", "gender_metadata",
     "clarity_1_5", "naturalness_1_5", "motion_1_5", "notes",
 ]
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def asset_reference(asset: Path) -> tuple[Path, str]:
+    """Resolve an asset and return a repository-relative, portable reference."""
+    resolved = asset.resolve()
+    if not resolved.is_file():
+        raise ValueError(f"asset does not exist: {resolved}")
+    try:
+        relative = resolved.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError("asset must be inside the repository to avoid recording a private absolute path") from exc
+    return resolved, relative.as_posix()
+
+
+def append_row(output: Path, row: dict[str, object]) -> None:
+    """Append one record only when an existing CSV has the expected schema."""
+    if output.is_symlink():
+        raise ValueError("output must not be a symbolic link")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    new_file = not output.exists()
+    if not new_file:
+        with output.open(newline="", encoding="utf-8") as stream:
+            header = next(csv.reader(stream), None)
+        if header != FIELDS:
+            raise ValueError("output CSV header does not match the media evaluation schema")
+    with output.open("a", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=FIELDS)
+        if new_file:
+            writer.writeheader()
+        writer.writerow(row)
 
 
 def probe(path: Path) -> dict[str, object]:
@@ -59,16 +90,21 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("docs/evaluation-results.csv"))
     args = parser.parse_args()
 
-    asset = args.asset.resolve()
-    if not asset.is_file():
-        parser.error(f"asset does not exist: {asset}")
-    digest = hashlib.sha256(asset.read_bytes()).hexdigest()
+    try:
+        asset, asset_name = asset_reference(args.asset)
+    except ValueError as exc:
+        parser.error(str(exc))
+    digest_state = hashlib.sha256()
+    with asset.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest_state.update(chunk)
+    digest = digest_state.hexdigest()
     row = {
         "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "kind": args.kind,
         "language": args.language,
         "candidate": args.candidate,
-        "asset": str(asset),
+        "asset": asset_name,
         "sha256": digest,
         "bytes": asset.stat().st_size,
         **probe(asset),
@@ -81,13 +117,10 @@ def main() -> None:
         "motion_1_5": "",
         "notes": args.notes,
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    new_file = not args.output.exists()
-    with args.output.open("a", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=FIELDS)
-        if new_file:
-            writer.writeheader()
-        writer.writerow(row)
+    try:
+        append_row(args.output, row)
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
     print(json.dumps(row, ensure_ascii=False, indent=2))
 
 

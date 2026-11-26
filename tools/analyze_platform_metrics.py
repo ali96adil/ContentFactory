@@ -6,6 +6,9 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
+import hashlib
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 from statistics import median
@@ -17,6 +20,9 @@ FIELDS = {
     "rights_status", "quality_status", "external_cost_usd", "data_origin",
 }
 PLATFORMS = {"youtube", "tiktok", "instagram", "facebook"}
+ROOT = Path(__file__).resolve().parents[1]
+ALLOWED_LEDGER_ROOTS = (ROOT / "lab" / "imports", ROOT / "lab" / "evidence")
+LEDGER_SCHEMA_VERSION = "1"
 
 
 def number(row: dict[str, str], field: str) -> float:
@@ -24,6 +30,8 @@ def number(row: dict[str, str], field: str) -> float:
         value = float(row[field])
     except (KeyError, ValueError) as exc:
         raise ValueError(f"{field} must be numeric") from exc
+    if not math.isfinite(value):
+        raise ValueError(f"{field} must be finite")
     if value < 0:
         raise ValueError(f"{field} cannot be negative")
     return value
@@ -44,21 +52,76 @@ def rate(row: dict[str, str]) -> dict[str, float] | None:
 def load_rows(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as stream:
         reader = csv.DictReader(stream)
-        missing = FIELDS - set(reader.fieldnames or [])
+        headers = reader.fieldnames or []
+        if len(headers) != len(set(headers)):
+            raise ValueError("CSV contains duplicate column names")
+        missing = FIELDS - set(headers)
         if missing:
             raise ValueError(f"CSV is missing columns: {', '.join(sorted(missing))}")
         rows = list(reader)
     for index, row in enumerate(rows, start=2):
+        if None in row:
+            raise ValueError(f"row {index}: contains more values than the CSV header")
+        if any(value is None for value in row.values()):
+            raise ValueError(f"row {index}: has fewer values than the CSV header")
         row["platform"] = row["platform"].strip().lower()
         row["role"] = row["role"].strip().lower()
         if row["platform"] not in PLATFORMS:
             raise ValueError(f"row {index}: unsupported platform {row['platform']!r}")
         if row["role"] not in {"baseline", "candidate"}:
             raise ValueError(f"row {index}: role must be baseline or candidate")
-        datetime.fromisoformat(row["observed_at"].replace("Z", "+00:00"))
+        origin = row["data_origin"].strip().lower()
+        is_synthetic = "synthetic" in origin or "test_only" in origin
+        if not is_synthetic and origin not in {"manual_export", "manual_entry"}:
+            raise ValueError(f"row {index}: data_origin must be manual_export, manual_entry, or TEST_ONLY")
+        try:
+            datetime.fromisoformat(row["observed_at"].replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError(f"row {index}: observed_at must be an ISO 8601 date/time") from exc
         for field in ("age_hours", "impressions", "views", "avg_watch_seconds",
                       "duration_seconds", "saves", "shares", "external_cost_usd"):
             number(row, field)
+    return rows
+
+
+def load_ledger_rows(path: Path) -> list[dict[str, str]]:
+    if path.is_symlink():
+        raise ValueError("ledger must not be a symbolic link")
+    resolved = path.resolve()
+    if not any(resolved.is_relative_to(root.resolve()) for root in ALLOWED_LEDGER_ROOTS):
+        raise ValueError("ledger must be under lab/imports/ or lab/evidence/")
+    if not resolved.is_file():
+        raise FileNotFoundError(f"metrics ledger not found: {resolved}")
+    try:
+        with sqlite3.connect(resolved.as_uri() + "?mode=ro", uri=True) as connection:
+            version = connection.execute(
+                "SELECT value FROM ledger_meta WHERE name='schema_version'"
+            ).fetchone()
+            if version is None or version[0] != LEDGER_SCHEMA_VERSION:
+                raise ValueError("unsupported or missing metrics ledger schema version")
+            records = connection.execute(
+                "SELECT row_key,content_sha256,row_json FROM metric_snapshots ORDER BY row_key"
+            ).fetchall()
+    except sqlite3.Error as exc:
+        raise ValueError(f"cannot read metrics ledger: {exc}") from exc
+
+    rows: list[dict[str, str]] = []
+    for row_key, expected_digest, row_json in records:
+        if not all(isinstance(value, str) for value in (row_key, expected_digest, row_json)):
+            raise ValueError("metrics ledger contains invalid row types")
+        digest = hashlib.sha256(row_json.encode("utf-8")).hexdigest()
+        if digest != expected_digest:
+            raise ValueError("metrics ledger row integrity check failed")
+        row = json.loads(row_json)
+        if not isinstance(row, dict) or set(row) != FIELDS or any(not isinstance(value, str) for value in row.values()):
+            raise ValueError("metrics ledger row does not match the current CSV contract")
+        identity = json.dumps(
+            [row[field] for field in ("platform", "account_id", "post_id", "observed_at")],
+            ensure_ascii=False, separators=(",", ":"),
+        )
+        if hashlib.sha256(identity.encode("utf-8")).hexdigest() != row_key:
+            raise ValueError("metrics ledger identity check failed")
+        rows.append(row)
     return rows
 
 
@@ -169,11 +232,14 @@ def compare(rows: list[dict[str, str]]) -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("input", type=Path, help="local CSV export; no network access is used")
+    parser.add_argument("input", type=Path, nargs="?", help="local CSV export; no network access is used")
+    parser.add_argument("--ledger", type=Path, help="read previously imported local snapshots from SQLite")
     parser.add_argument("--output", type=Path, help="write JSON here instead of stdout")
     args = parser.parse_args()
+    if (args.input is None) == (args.ledger is None):
+        parser.error("provide exactly one of an input CSV or --ledger")
     try:
-        result = compare(load_rows(args.input))
+        result = compare(load_ledger_rows(args.ledger) if args.ledger else load_rows(args.input))
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
