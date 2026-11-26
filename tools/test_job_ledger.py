@@ -5,7 +5,9 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 import hashlib
+import os
 from pathlib import Path
+import stat
 import tempfile
 import unittest
 
@@ -153,6 +155,23 @@ class JobLedgerTests(unittest.TestCase):
         link.symlink_to(target)
         with self.assertRaisesRegex(JobLedgerError, "symbolic link"):
             JobLedger(link).get("missing")
+
+    def test_database_and_sqlite_journal_are_owner_only(self) -> None:
+        queued = self.ledger.enqueue(sample_job(), now=T0)
+        database = self.ledger.database
+        self.assertEqual(stat.S_IMODE(database.stat().st_mode), 0o600)
+
+        os.chmod(database, 0o644)
+        self.ledger.get(queued["job_id"])
+        self.assertEqual(stat.S_IMODE(database.stat().st_mode), 0o600)
+
+        with self.ledger._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("UPDATE jobs SET last_error='mode check' WHERE job_id=?", (queued["job_id"],))
+            journal = Path(f"{database}-journal")
+            self.assertTrue(journal.is_file())
+            self.assertEqual(stat.S_IMODE(journal.stat().st_mode), 0o600)
+            db.execute("ROLLBACK")
 
     def test_malformed_public_arguments_fail_with_contract_errors(self) -> None:
         with self.assertRaisesRegex(JobLedgerError, "job must be an object"):

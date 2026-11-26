@@ -6,10 +6,13 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import errno
+import os
 from pathlib import Path, PurePosixPath
 import re
 import secrets
 import sqlite3
+import stat
 from typing import Any, Iterator
 
 
@@ -18,6 +21,7 @@ ALLOWED_DATABASE_ROOTS = (ROOT / "lab" / "imports", ROOT / "lab" / "evidence")
 ARTIFACT_ROOT = ROOT / "lab" / "evidence"
 SCHEMA_VERSION = "1"
 MAX_ATTEMPTS = 3  # One initial attempt plus two retries.
+PRIVATE_FILE_MODE = 0o600
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 JOB_FIELDS = (
     "topic_id", "revision", "stage", "locale", "format", "destination", "inputs_sha256"
@@ -108,6 +112,27 @@ class JobLedger:
     def __init__(self, database: Path):
         self.database = Path(database)
 
+    @staticmethod
+    def _secure_database_file(path: Path) -> None:
+        """Create/open the local ledger without following symlinks and enforce owner-only access."""
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        base_flags = os.O_RDWR | nofollow
+        try:
+            try:
+                descriptor = os.open(path, base_flags | os.O_CREAT | os.O_EXCL, PRIVATE_FILE_MODE)
+            except FileExistsError:
+                descriptor = os.open(path, base_flags)
+            try:
+                if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+                    raise JobLedgerError("database must be a regular file")
+                os.fchmod(descriptor, PRIVATE_FILE_MODE)
+            finally:
+                os.close(descriptor)
+        except OSError as exc:
+            if exc.errno in {errno.ELOOP, errno.EMLINK}:
+                raise JobLedgerError("database must not be a symbolic link") from exc
+            raise
+
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
         if self.database.suffix.lower() != ".sqlite3" or self.database.is_symlink():
@@ -117,6 +142,7 @@ class JobLedger:
             raise JobLedgerError("database must be under lab/imports/ or lab/evidence/")
         self.database = resolved
         self.database.parent.mkdir(parents=True, exist_ok=True)
+        self._secure_database_file(self.database)
         db = sqlite3.connect(self.database, timeout=10, isolation_level=None)
         try:
             db.row_factory = sqlite3.Row
