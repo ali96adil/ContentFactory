@@ -82,28 +82,31 @@ def import_csv(source_path: Path, database_path: Path) -> dict[str, object]:
     with sqlite3.connect(database, timeout=10, isolation_level=None) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         connection.execute("PRAGMA busy_timeout=10000")
-        connection.execute("""CREATE TABLE IF NOT EXISTS ledger_meta (
-            name TEXT PRIMARY KEY, value TEXT NOT NULL
-        )""")
-        connection.execute("""CREATE TABLE IF NOT EXISTS metric_snapshots (
-            row_key TEXT PRIMARY KEY,
-            content_sha256 TEXT NOT NULL,
-            row_json TEXT NOT NULL,
-            imported_at_utc TEXT NOT NULL
-        )""")
-        version = connection.execute(
-            "SELECT value FROM ledger_meta WHERE name='schema_version'"
-        ).fetchone()
-        if version is None:
-            connection.execute(
-                "INSERT INTO ledger_meta(name,value) VALUES('schema_version',?)",
-                (SCHEMA_VERSION,),
-            )
-        elif version[0] != SCHEMA_VERSION:
-            raise ImportError(f"unsupported ledger schema version: {version[0]}")
-
         connection.execute("BEGIN IMMEDIATE")
         try:
+            # Acquire the writer lock before schema discovery. Otherwise two
+            # first-time importers can both observe a missing schema row and
+            # race to insert the unique schema_version key.
+            connection.execute("""CREATE TABLE IF NOT EXISTS ledger_meta (
+                name TEXT PRIMARY KEY, value TEXT NOT NULL
+            )""")
+            connection.execute("""CREATE TABLE IF NOT EXISTS metric_snapshots (
+                row_key TEXT PRIMARY KEY,
+                content_sha256 TEXT NOT NULL,
+                row_json TEXT NOT NULL,
+                imported_at_utc TEXT NOT NULL
+            )""")
+            version = connection.execute(
+                "SELECT value FROM ledger_meta WHERE name='schema_version'"
+            ).fetchone()
+            if version is None:
+                connection.execute(
+                    "INSERT INTO ledger_meta(name,value) VALUES('schema_version',?)",
+                    (SCHEMA_VERSION,),
+                )
+            elif version[0] != SCHEMA_VERSION:
+                raise ImportError(f"unsupported ledger schema version: {version[0]}")
+
             now = datetime.now(timezone.utc).isoformat(timespec="seconds")
             for row in normalized:
                 identity = json.dumps(

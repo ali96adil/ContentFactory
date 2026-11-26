@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 import importlib.util
 import json
 from pathlib import Path
@@ -73,12 +74,18 @@ def main() -> None:
         assert normalized["inserted_rows"] == 0 and normalized["duplicate_rows"] == 26
 
         concurrent_database = temp / "concurrent.sqlite3"
-        with ThreadPoolExecutor(max_workers=2) as pool:
+        concurrent_importers = 8
+        start_together = Barrier(concurrent_importers)
+        def import_concurrently(_: int) -> dict[str, object]:
+            start_together.wait(timeout=10)
+            return IMPORTER.import_csv(FIXTURE, concurrent_database)
+
+        with ThreadPoolExecutor(max_workers=concurrent_importers) as pool:
             concurrent_results = list(pool.map(
-                lambda _: IMPORTER.import_csv(FIXTURE, concurrent_database), range(2)
+                import_concurrently, range(concurrent_importers)
             ))
         assert sum(result["inserted_rows"] for result in concurrent_results) == 26
-        assert sum(result["duplicate_rows"] for result in concurrent_results) == 26
+        assert sum(result["duplicate_rows"] for result in concurrent_results) == 26 * (concurrent_importers - 1)
         assert all(result["ledger_row_count"] == 26 for result in concurrent_results)
 
         tampered_database = temp / "tampered.sqlite3"
